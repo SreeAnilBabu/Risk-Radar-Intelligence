@@ -95,6 +95,27 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Constitution Alignment *(mandatory)*
+
+- **CA-001 Code Quality**: Spec MUST confirm TypeScript strict mode, no `any`,
+  React 18 functional components + hooks only, and Pages -> Layouts -> Features ->
+  UI Components hierarchy.
+- **CA-002 Testing**: Spec MUST define unit tests for utilities/risk logic and
+  component tests for critical interactions (map clicks, filter changes); E2E tests
+  are excluded unless constitution is amended.
+- **CA-003 UX**: Spec MUST define dark-theme-first UX, loading skeleton behavior,
+  and risk levels (Green/Yellow/Orange/Red) with non-color indicators.
+- **CA-004 Performance**: Spec MUST include targets for initial map render (<2s)
+  and interaction response (<200ms), plus caching/lazy-loading/virtualization rules.
+- **CA-005 Architecture**: Spec MUST remain within approved stack and state model,
+  including FAB Agent usage and mock JSON data source.
+- **CA-006 Demo Scope**: Each story MUST be demo-visible within 7 minutes;
+  non-demo-visible capabilities MUST be excluded from scope.
+- **CA-007 Security + Accessibility**: Spec MUST prohibit real secrets and define
+  ARIA + keyboard requirements for critical paths.
+- **CA-008 Scope Governance**: Spec MUST explicitly exclude auth/login screens,
+  DB migrations/ORM, and CI/CD setup for hackathon delivery.
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
@@ -113,6 +134,10 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-005**: Initial map render completes in <2 seconds on target demo hardware.
+- **SC-006**: Critical interactions (map clicks, filter changes) respond in <200ms.
+- **SC-007**: 100% of in-scope user stories are visually demonstrable in the
+  7-minute demo narrative.
 
 ## Assumptions
 

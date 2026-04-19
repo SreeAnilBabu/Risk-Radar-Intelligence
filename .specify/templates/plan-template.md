@@ -31,7 +31,23 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Code Quality: TypeScript strict mode enabled, zero `any`, React 18 functional
+  components + hooks only, component hierarchy defined (Pages -> Layouts ->
+  Features -> UI Components), and component file size plan <= 200 lines.
+- Testing: Unit test scope defined for utilities and risk calculations; component
+  tests defined for map clicks and filter changes; no E2E tests planned.
+- UX: Dark-theme-first legal/finance aesthetic, skeleton loading plan, and risk
+  color semantics + non-color fallback plan documented.
+- Performance: Initial map render target <2s, interaction latency target <200ms,
+  caching strategy for risk calculations, lazy-loading and list virtualization plan.
+- Architecture: Stack matches constitution (React/TypeScript/Vite/Tailwind,
+  Leaflet/react-leaflet, Recharts, Framer Motion, Node/Express, FAB Agent SDK,
+  mock JSON data, Context + useReducer).
+- Demo-first: Every planned feature mapped to explicit 7-minute demo segment.
+- Security + Accessibility: No real secrets, ARIA + keyboard coverage for critical
+  paths, color-blind safe visual encoding.
+- Scope Governance: No auth screen, no DB migrations/ORM, no CI/CD expansion,
+  focus stays on map + AI intelligence + dashboard.
 
 ## Project Structure
 
