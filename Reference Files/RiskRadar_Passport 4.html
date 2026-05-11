@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Risk Intelligence — Passport | Wolters Kluwer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<style>
+/* ═══════════════════════════════════════════
+   PASSPORT THEME — RiskRadar Native Integration
+   Extracted from Passport UI screenshot
+═══════════════════════════════════════════ */
+:root {
+  --hdr:        #1e5f9c;
+  --hdr-text:   #ffffff;
+  --nav-bg:     #f3f6f9;
+  --nav-text:   #333333;
+  --nav-active: #1e5f9c;
+  --nav-ul:     #1976d2;
+  --orange:     #e8890a;
+  --card-hdr:   #c5d8ea;
+  --card-hdr-t: #1a3d5f;
+  --card-bg:    #ffffff;
+  --page-bg:    #e6ecf1;
+  --border:     #bfcdd8;
+  --row-alt:    #f4f7fb;
+  --text:       #2c3e50;
+  --text-dim:   #6b7c8d;
+  --red:        #c0392b;
+  --amber:      #b7770d;
+  --green:      #1a7a3c;
+  --blue:       #1a5f9c;
+  --red-bg:     #fdf2f1;
+  --amber-bg:   #fdf8ed;
+  --green-bg:   #edf7f1;
+  --blue-bg:    #eef4fb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: var(--text); background: var(--page-bg); }
+
+/* ── DEV BANNER ── */
+.dev-banner {
+  background: repeating-linear-gradient(-45deg,#2575b8,#2575b8 14px,#1e6aad 14px,#1e6aad 28px);
+  color:#fff; text-align:center; padding:5px; font-size:11px;
+  font-weight:bold; letter-spacing:4px; text-transform:uppercase;
+}
+
+/* ── TOP NAV ── */
+.top-nav {
+  background: var(--hdr); display:flex; align-items:center;
+  padding:0 12px; height:46px; gap:0;
+}
+.wk-logo { display:flex; align-items:center; gap:9px; padding-right:14px;
+  border-right:1px solid rgba(255,255,255,0.3); margin-right:14px; }
+.wk-dots { display:grid; grid-template-columns:1fr 1fr; gap:2px; width:20px; }
+.wk-dot { width:9px; height:9px; border-radius:1px; }
+.d1{background:#e63946;} .d2{background:#f4a261;} .d3{background:#2a9d8f;} .d4{background:#457b9d;}
+.wk-name { color:#fff; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+.wk-pipe { color:rgba(255,255,255,0.4); margin:0 10px; font-size:16px; }
+.app-label { color:rgba(255,255,255,0.9); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+.top-right { margin-left:auto; display:flex; align-items:center; gap:12px; color:#fff; font-size:12px; }
+.sub-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff;
+  padding:4px 10px; font-size:12px; cursor:pointer; border-radius:2px; display:flex; align-items:center; gap:4px; }
+.top-icon { font-size:16px; cursor:pointer; opacity:0.85; }
+.user-chip { display:flex; align-items:center; gap:6px; font-size:12px; }
+.user-av { width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.2);
+  display:flex; align-items:center; justify-content:center; font-size:13px; }
+
+/* ── SECOND NAV ── */
+.second-nav { background:var(--nav-bg); border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 6px; height:38px; }
+.icon-group { display:flex; align-items:center; padding-right:8px; margin-right:4px;
+  border-right:1px solid var(--border); gap:0; }
+.nav-icon { display:flex; flex-direction:column; align-items:center; padding:3px 10px;
+  cursor:pointer; font-size:10px; color:var(--text-dim); gap:1px; border-bottom:3px solid transparent; }
+.nav-icon:hover { background:#e4eaf2; }
+.nav-icon .ni { font-size:15px; }
+.nav-tabs { display:flex; align-items:stretch; }
+.ntab { padding:0 14px; display:flex; align-items:center; font-size:13px; color:var(--nav-text);
+  cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap; }
+.ntab:hover { background:#e4eaf2; color:var(--nav-active); }
+.ntab.active { color:var(--nav-active); border-bottom:3px solid var(--nav-ul); font-weight:600; }
+.ntab.orange { color:var(--orange); }
+.ntab.risk { color:var(--red); font-weight:700; border-bottom:3px solid var(--red); }
+.ntab.risk:hover { color:var(--red); }
+.nav-search { margin-left:auto; display:flex; align-items:center; gap:4px; font-size:11px;
+  color:var(--text-dim); padding:0 8px; }
+.nav-search-labels { display:flex; gap:4px; }
+.nav-search-labels a { color:var(--nav-active); cursor:pointer; }
+.ns-input { border:1px solid var(--border); padding:3px 8px; font-size:12px;
+  border-radius:2px; width:190px; background:#fff; }
+
+/* ── PAGE WRAP ── */
+.page-wrap { padding:10px 12px; }
+
+/* Page header bar */
+.page-hdr-bar {
+  background:#fff; border:1px solid var(--border); border-radius:2px;
+  padding:7px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+}
+.page-title { font-size:14px; font-weight:700; color:var(--card-hdr-t); }
+.page-title small { font-weight:400; font-size:12px; color:var(--text-dim); margin-left:8px; }
+.page-controls { display:flex; gap:6px; align-items:center; }
+.pp-sel { border:1px solid var(--border); padding:4px 8px; font-size:12px; border-radius:2px;
+  background:#fff; color:var(--text); cursor:pointer; }
+.pp-btn { background:var(--hdr); color:#fff; border:none; padding:5px 10px;
+  font-size:12px; border-radius:2px; cursor:pointer; }
+.pp-btn.red { background:var(--red); display:flex; align-items:center; gap:5px; }
+.badge { background:#fff; color:var(--red); font-size:10px; font-weight:700;
+  padding:1px 5px; border-radius:10px; }
+
+/* ── STAT ROW ── */
+.stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px; }
+.stat-w { background:#fff; border:1px solid var(--border); border-radius:2px; overflow:hidden; }
+.stat-w.red   { border-bottom:3px solid var(--red); }
+.stat-w.amber { border-bottom:3px solid var(--amber); }
+.stat-w.green { border-bottom:3px solid var(--green); }
+.stat-w.blue  { border-bottom:3px solid var(--blue); }
+.stat-w-hdr { background:var(--card-hdr); padding:4px 10px; font-size:10px; font-weight:700;
+  color:var(--card-hdr-t); text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+.stat-w-body { padding:8px 10px; display:flex; align-items:center; gap:10px; }
+.stat-num { font-size:28px; font-weight:800; line-height:1; }
+.stat-num.red { color:var(--red); } .stat-num.amber { color:var(--amber); }
+.stat-num.green { color:var(--green); } .stat-num.blue { color:var(--blue); }
+.stat-detail { display:flex; flex-direction:column; }
+.stat-lbl { font-size:12px; color:var(--text); font-weight:600; }
+.stat-sub { font-size:10px; color:var(--text-dim); margin-top:2px; }
+.stat-trend { font-size:10px; font-weight:700; margin-top:2px; }
+.trend-up { color:var(--red); } .trend-dn { color:var(--green); }
+
+/* ── MAIN LAYOUT ── */
+.main-layout { display:grid; grid-template-columns:1fr; gap:8px; }
+
+/* Clickable stat cards */
+.stat-w.clickable { cursor:pointer; transition:box-shadow 0.15s, transform 0.1s; }
+.stat-w.clickable:hover { box-shadow:0 3px 12px rgba(0,0,0,0.14); transform:translateY(-1px); }
+.stat-w.clickable:active { transform:translateY(0); }
+.stat-click-hint { font-size:9px; color:var(--text-dim); margin-top:3px; opacity:0.75; }
+
+/* Matter List Screen */
+.ml-screen { background:var(--page-bg); }
+.ml-toolbar { display:flex; align-items:center; gap:10px; padding:8px 12px;
+  background:#fff; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.ml-toolbar-title { font-size:13px; font-weight:700; flex:1; }
+.ml-link { color:var(--nav-active); font-size:12px; cursor:pointer; text-decoration:underline; white-space:nowrap; }
+.ml-table-wrap { padding:10px 12px; }
+.ml-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.ml-tbl thead tr { background:var(--card-hdr); }
+.ml-tbl thead th { padding:8px 10px; text-align:left; font-weight:700; font-size:10px;
+  color:var(--card-hdr-t); border:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
+.ml-tbl tbody td { padding:7px 10px; border:1px solid #edf2f7; }
+.ml-tbl tbody tr:nth-child(even) { background:var(--row-alt); }
+.ml-tbl tbody tr:hover { background:#e4edf7; cursor:pointer; }
+.ml-pill { font-size:10px; padding:2px 7px; border-radius:2px; font-weight:700; display:inline-block; }
+.ml-pill.red   { background:var(--red-bg);   color:var(--red);   border:1px solid #f0c4c2; }
+.ml-pill.amber { background:var(--amber-bg); color:var(--amber); border:1px solid #eed8a0; }
+.ml-pill.green { background:var(--green-bg); color:var(--green); border:1px solid #a8d8b8; }
+
+/* Burn bar inside AI Briefing */
+.burn-section { margin-bottom:10px; }
+.burn-hdr-row { display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:6px; font-size:11px; }
+.burn-months { display:grid; grid-template-columns:repeat(12,1fr); font-size:9px;
+  color:var(--text-dim); text-align:center; margin-bottom:3px; }
+.burn-months .cur { color:var(--nav-active); font-weight:700; }
+.burn-track { position:relative; height:18px; background:#e8edf3; border-radius:3px; overflow:hidden; }
+.burn-bar { position:absolute; left:0; top:0; height:100%; border-radius:3px;
+  display:flex; align-items:center; padding-left:8px;
+  font-size:10px; font-weight:700; color:rgba(255,255,255,0.95); }
+.burn-now { position:absolute; top:0; bottom:0; width:2px; background:rgba(0,0,0,0.35); z-index:1; }
+.burn-legend { display:flex; gap:16px; margin-top:6px; font-size:10px; color:var(--text-dim); }
+
+/* ── LEFT PANEL ── */
+.left-panel { display:flex; flex-direction:column; gap:8px; }
+
+/* ── WIDGET ── */
+.widget { background:#fff; border:1px solid var(--border); border-radius:2px; }
+.widget-hdr { background:var(--card-hdr); padding:6px 10px; font-size:11px; font-weight:700;
+  color:var(--card-hdr-t); border-bottom:1px solid var(--border); display:flex;
+  align-items:center; justify-content:space-between; text-transform:uppercase; letter-spacing:0.4px; }
+.widget-icons { display:flex; gap:6px; color:var(--text-dim); font-size:13px; cursor:pointer;
+  text-transform:none; letter-spacing:0; }
+
+/* ── ALERTS PANEL (right side) ── */
+.alert-item { padding:8px 10px; border-bottom:1px solid #edf2f7; cursor:pointer; }
+.alert-item:last-child { border-bottom:none; }
+.alert-item:hover { background:var(--row-alt); }
+.alert-title { font-size:11px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:5px; }
+.adot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.adot.red{background:var(--red);} .adot.amber{background:var(--amber);}
+.alert-sub { font-size:10px; color:var(--text-dim); margin-top:2px; padding-left:12px; }
+.alert-time { font-size:9px; color:var(--text-dim); padding-left:12px; margin-top:1px; }
+.view-all-btn { display:block; text-align:center; padding:8px; font-size:11px;
+  color:var(--nav-active); cursor:pointer; border-top:1px solid #edf2f7; }
+.view-all-btn:hover { background:var(--row-alt); }
+
+/* ── MAIN PANEL TABS ── */
+.main-panel {}
+.tab-bar { display:flex; border-bottom:1px solid var(--border); background:var(--nav-bg); padding:0; }
+.tab-btn { padding:8px 16px; font-size:12px; cursor:pointer; border-bottom:3px solid transparent;
+  color:var(--text-dim); background:none; border-top:none; border-left:none; border-right:none;
+  white-space:nowrap; font-family:inherit; }
+.tab-btn:hover { color:var(--nav-active); background:#e4eaf2; }
+.tab-btn.active { color:var(--nav-active); border-bottom:3px solid var(--nav-active);
+  font-weight:700; background:#fff; }
+.tab-content { display:none; opacity:0; transition:opacity 0.15s ease; }
+.tab-content.active { display:block; animation:fadeTab 0.15s ease forwards; }
+@keyframes fadeTab { from{opacity:0} to{opacity:1} }
+
+/* Filter bar */
+.filter-row { padding:7px 10px; background:var(--row-alt); border-bottom:1px solid var(--border);
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.flabel { font-size:11px; color:var(--text-dim); }
+
+/* Toggle filter buttons — white bg, colored dot, toggle effect */
+.fbtn {
+  padding:4px 12px 4px 8px;
+  font-size:11px;
+  border-radius:3px;
+  border:1.5px solid var(--border);
+  background:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-family:inherit;
+  color:var(--text-dim);
+  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  position:relative;
+  user-select:none;
+}
+.fbtn:hover {
+  background:#f0f4f8;
+  border-color:#9db4c8;
+}
+/* Colored indicator dot inside button */
+.fbtn .fdot {
+  width:9px; height:9px; border-radius:50%; flex-shrink:0;
+  border:1.5px solid rgba(0,0,0,0.15);
+  transition: transform 0.15s;
+}
+.fbtn .fdot.red   { background:var(--red); }
+.fbtn .fdot.amber { background:var(--amber); }
+.fbtn .fdot.green { background:var(--green); }
+/* Active/ON state — colored border + bottom accent + shadow */
+.fbtn.on {
+  color:var(--text);
+  font-weight:600;
+  background:#fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.fbtn.on.red   { border-color:var(--red);   border-bottom:3px solid var(--red);   color:var(--red); }
+.fbtn.on.amber { border-color:var(--amber); border-bottom:3px solid var(--amber); color:var(--amber); }
+.fbtn.on.green { border-color:var(--green); border-bottom:3px solid var(--green); color:var(--green); }
+.fbtn.on .fdot { transform:scale(1.2); }
+/* Press animation */
+.fbtn:active { transform:translateY(1px); box-shadow:none; }
+/* OFF state label muted */
+.fbtn:not(.on) { opacity:0.65; }
+.fbtn:not(.on):hover { opacity:1; }
+
+/* Search box in filter bar */
+.map-search {
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  border:1.5px solid var(--border);
+  border-radius:3px;
+  background:#fff;
+  padding:2px 8px;
+  font-size:11px;
+  color:var(--text-dim);
+  transition:border-color 0.15s;
+}
+.map-search:focus-within { border-color:var(--nav-active); }
+.map-search input {
+  border:none;
+  outline:none;
+  font-size:11px;
+  width:150px;
+  font-family:inherit;
+  color:var(--text);
+  background:transparent;
+}
+.map-search input::placeholder { color:#aab4be; }
+.map-search-icon { color:var(--text-dim); font-size:12px; }
+
+/* Map */
+#pp-map { height:520px; width:100%; }
+.leaflet-popup-content-wrapper { border-radius:2px !important; border:1px solid var(--border) !important;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15) !important; font-family:'Segoe UI',Arial,sans-serif !important; font-size:12px !important; }
+.leaflet-popup-tip-container { display:none; }
+.pp-tooltip.leaflet-tooltip { background:#fff; border:1px solid var(--border); border-radius:3px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.18); padding:8px 10px; font-size:12px; pointer-events:none; }
+.pp-tooltip.leaflet-tooltip::before { display:none; }
+.pp-popup-title { font-weight:700; color:var(--card-hdr-t); margin-bottom:6px; font-size:12px; }
+.pp-popup-row { display:flex; justify-content:space-between; gap:16px; margin-bottom:3px; font-size:11px; }
+.pp-popup-lbl { color:var(--text-dim); }
+.pp-popup-val { font-weight:600; }
+.pp-popup-val.red { color:var(--red); }
+.pp-popup-val.amber { color:var(--amber); }
+
+/* Firm Exposure */
+.firm-list { padding:6px 10px; overflow-y:auto; max-height:400px; }
+.firm-col-hdr { display:flex; align-items:center; gap:8px; padding:4px 4px 8px;
+  border-bottom:1px solid var(--border); font-size:10px; font-weight:700;
+  color:var(--card-hdr-t); text-transform:uppercase; letter-spacing:0.3px; }
+.firm-col-hdr .fn { width:150px; flex-shrink:0; }
+.firm-col-hdr .fb { flex:1; }
+.firm-col-hdr .fs { width:65px; text-align:right; flex-shrink:0; }
+.firm-col-hdr .fp { width:120px; flex-shrink:0; text-align:center; }
+.firm-row { display:flex; align-items:center; gap:8px; padding:7px 4px;
+  border-bottom:1px solid #edf2f7; }
+.firm-row:hover { background:var(--row-alt); }
+.firm-rank { font-size:10px; color:var(--text-dim); width:16px; text-align:right; flex-shrink:0; }
+.firm-name { font-size:12px; font-weight:600; width:150px; flex-shrink:0; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap; }
+.firm-bar-wrap { flex:1; height:14px; background:#e8edf3; border-radius:2px; overflow:hidden; display:flex; }
+.fb-seg { height:100%; }
+.fb-seg.red{background:var(--red);} .fb-seg.amber{background:var(--amber);} .fb-seg.green{background:var(--green);}
+.firm-spend { font-size:11px; color:var(--text-dim); width:65px; text-align:right; flex-shrink:0; }
+.firm-pills { display:flex; gap:3px; width:120px; flex-shrink:0; flex-wrap:wrap; }
+.rpill { font-size:10px; padding:1px 5px; border-radius:2px; font-weight:700; white-space:nowrap; }
+.rpill.red { background:var(--red-bg); color:var(--red); border:1px solid #f0c4c2; }
+.rpill.amber { background:var(--amber-bg); color:var(--amber); border:1px solid #eed8a0; }
+.rpill.green { background:var(--green-bg); color:var(--green); border:1px solid #a8d8b8; }
+
+/* Risk Matrix */
+.matrix-wrap { padding:10px; }
+.matrix-caption { font-size:11px; color:var(--text-dim); margin-bottom:8px; }
+.matrix-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border);
+  border:1px solid var(--border); }
+.mquad { padding:10px 12px; background:#fff; min-height:150px; overflow-y:auto; }
+.mquad.act-now { background:var(--red-bg); }
+.mquad.watch   { background:var(--amber-bg); }
+.mquad.review  { background:var(--blue-bg); }
+.mquad.monitor { background:var(--green-bg); }
+.mquad-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+  margin-bottom:2px; padding-bottom:4px; display:flex; align-items:center; gap:5px; }
+.mquad-title.red  { color:var(--red); border-bottom:2px solid var(--red); }
+.mquad-title.amber{ color:var(--amber); border-bottom:2px solid var(--amber); }
+.mquad-title.blue { color:var(--blue); border-bottom:2px solid var(--blue); }
+.mquad-title.green{ color:var(--green); border-bottom:2px solid var(--green); }
+.mquad-axis { font-size:9px; color:var(--text-dim); margin-bottom:6px; font-style:italic; }
+.mquad-count { font-size:10px; font-weight:700; margin-bottom:5px; }
+.mitem { font-size:10px; padding:3px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+.mitem:last-child { border-bottom:none; }
+.mitem-id { color:var(--text-dim); font-size:9px; }
+.matrix-axis-labels { display:grid; grid-template-columns:1fr 1fr; margin-top:2px; }
+.ax-lbl { font-size:9px; color:var(--text-dim); text-align:center; font-style:italic; padding:2px; }
+
+/* Timeline */
+.tl-toolbar { padding:6px 10px; background:var(--row-alt); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; font-size:11px; color:var(--text-dim); }
+.tl-scroll { overflow-y:auto; max-height:380px; padding:6px 10px; }
+.tl-hdr { display:grid; grid-template-columns:160px 1fr; gap:8px; padding-bottom:5px;
+  border-bottom:1px solid var(--border); margin-bottom:4px; }
+.tl-months { display:grid; grid-template-columns:repeat(12,1fr); font-size:9px;
+  color:var(--text-dim); text-align:center; }
+.tl-months .cur { color:var(--nav-active); font-weight:700; }
+.tl-section-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+  padding:6px 0 2px; }
+.tl-section-lbl.red { color:var(--red); } .tl-section-lbl.amber { color:var(--amber); }
+.tl-row { display:grid; grid-template-columns:160px 1fr; gap:8px; align-items:center;
+  padding:3px 0; border-bottom:1px solid #edf2f7; }
+.tl-row:hover { background:var(--row-alt); }
+.tl-mname { font-size:10px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tl-track { position:relative; height:14px; background:#e8edf3; border-radius:2px; overflow:hidden; }
+.tl-bar { position:absolute; left:0; top:0; height:100%; border-radius:2px; display:flex;
+  align-items:center; padding-left:4px; font-size:9px; font-weight:700;
+  color:rgba(255,255,255,0.95); min-width:24px; }
+.tl-bar.red{background:var(--red);} .tl-bar.amber{background:var(--amber);} .tl-bar.green{background:var(--green);}
+.tl-now { position:absolute; top:0; bottom:0; width:2px; background:rgba(0,0,0,0.3); z-index:1; }
+
+/* ── RIGHT PANEL ── */
+.right-panel { display:flex; flex-direction:column; gap:8px; }
+.ri-item { padding:8px 10px; border-bottom:1px solid #edf2f7; font-size:11px; }
+.ri-item:last-child { border-bottom:none; }
+.ri-item-title { font-weight:700; color:var(--text); margin-bottom:2px; }
+.ri-item-val { font-size:16px; font-weight:800; }
+.ri-item-sub { font-size:10px; color:var(--text-dim); margin-top:1px; }
+
+/* ── SCREENS ── */
+.screen { display:none; position:fixed; inset:0; background:var(--page-bg); z-index:9000; overflow-y:auto; }
+.screen.visible { display:block; }
+.scr-chrome { background:var(--hdr); padding:0 14px; height:46px; display:flex;
+  align-items:center; gap:12px; color:#fff; border-bottom:1px solid rgba(0,0,0,0.2); }
+.back-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff;
+  padding:4px 10px; font-size:12px; cursor:pointer; border-radius:2px; font-family:inherit; }
+.scr-title { font-size:13px; font-weight:700; }
+.scr-body { padding:12px 14px; }
+
+/* Briefing screen */
+.bcard { background:#fff; border:1px solid var(--border); border-radius:2px; margin-bottom:10px; }
+.two-col { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.two-col > .bcard { flex:1; margin-bottom:0; }
+.bcard-hdr { background:var(--card-hdr); padding:6px 12px; font-size:11px; font-weight:700;
+  color:var(--card-hdr-t); border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.4px; }
+.bcard-body { padding:14px; }
+.ai-text { font-size:13px; line-height:1.8; color:var(--text); }
+.ai-text strong { color:var(--red); }
+.ai-text .aname { color:var(--blue); font-weight:700; }
+.checklist-item { display:flex; align-items:flex-start; gap:8px; padding:7px 0;
+  border-bottom:1px solid #edf2f7; font-size:12px; color:var(--text); }
+.checklist-item:last-child { border-bottom:none; }
+.checklist-item input[type=checkbox] { margin-top:2px; flex-shrink:0; accent-color:var(--nav-active); }
+
+/* Table */
+.pp-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.pp-tbl thead tr { background:var(--card-hdr); }
+.pp-tbl thead th { padding:7px 10px; text-align:left; font-weight:700; font-size:10px;
+  color:var(--card-hdr-t); border:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
+.pp-tbl tbody td { padding:6px 10px; border:1px solid #edf2f7; }
+.pp-tbl tbody tr:nth-child(even) { background:var(--row-alt); }
+.pp-tbl tbody tr:hover { background:#e4edf7; }
+.mlink { color:var(--nav-active); cursor:pointer; text-decoration:underline; }
+.risk-pill { font-size:10px; padding:2px 6px; border-radius:2px; font-weight:700; }
+.risk-pill.red { background:var(--red-bg); color:var(--red); border:1px solid #f0c4c2; }
+.risk-pill.amber { background:var(--amber-bg); color:var(--amber); border:1px solid #eed8a0; }
+
+/* Matter card */
+.matter-layout { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.spider-container { display:flex; align-items:center; justify-content:center; padding:10px; }
+.signal-row { display:flex; gap:8px; padding:10px 14px; border-bottom:1px solid #edf2f7;
+  align-items:flex-end; }
+.signal-grp { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.signal-bars-wrap { display:flex; gap:2px; align-items:flex-end; height:32px; }
+.sbar { width:6px; border-radius:1px; background:#dde3ea; }
+.sbar.on { background:var(--red); }
+.sbar.on.amber { background:var(--amber); }
+.sbar.on.green { background:var(--green); }
+.signal-lbl { font-size:9px; color:var(--text-dim); text-align:center; }
+.signal-val { font-size:10px; font-weight:700; }
+.activity-item { padding:6px 0; border-bottom:1px solid #edf2f7; font-size:11px; }
+.activity-item:last-child { border-bottom:none; }
+.activity-date { font-size:10px; color:var(--text-dim); margin-top:1px; }
+
+/* Signal bars (horizontal — replacing spider chart) */
+.sig-row { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #edf2f7; }
+.sig-row:last-child { border-bottom:none; }
+.sig-lbl { font-size:12px; font-weight:600; color:var(--text); width:140px; flex-shrink:0; }
+.sig-track { flex:1; height:18px; background:#e8edf3; border-radius:3px; overflow:hidden; }
+.sig-fill { height:100%; border-radius:3px; transition:width 0.5s ease; display:flex; align-items:center; padding-left:8px;
+  font-size:10px; font-weight:700; color:rgba(255,255,255,0.95); }
+.sig-fill.red   { background:var(--red); }
+.sig-fill.amber { background:var(--amber); }
+.sig-fill.green { background:var(--green); }
+.sig-val { font-size:12px; font-weight:800; width:60px; text-align:right; flex-shrink:0; }
+.sig-val.red   { color:var(--red); }
+.sig-val.amber { color:var(--amber); }
+.sig-val.green { color:var(--green); }
+
+/* Matter stat strip */
+.mstat-strip { display:flex; gap:0; border:1px solid var(--border); border-radius:2px; overflow:hidden; margin-bottom:12px; }
+.mstat-cell { flex:1; padding:10px 14px; background:#fff; border-right:1px solid var(--border); }
+.mstat-cell:last-child { border-right:none; }
+.mstat-label { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.4px; font-weight:700; margin-bottom:4px; }
+.mstat-val { font-size:20px; font-weight:800; line-height:1; }
+.mstat-sub { font-size:10px; color:var(--text-dim); margin-top:3px; }
+  0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(192,57,43,0); }
+}
+.pulse-marker { animation: pulse-marker 1.8s infinite; }
+
+/* Scrollable panels */
+.scroll-body { overflow-y:auto; }
+.h380 { max-height:380px; }
+
+/* Add Dashboard btn (matches Passport style) */
+.add-dashboard-btn { display:inline-block; margin-top:8px; padding:5px 12px; font-size:12px;
+  border:1px solid var(--border); background:#fff; color:var(--text); cursor:pointer;
+  border-radius:2px; font-family:inherit; }
+.add-dashboard-btn:hover { background:var(--row-alt); }
+
+/* ── ACTION TRACKING ── */
+.checklist-item.actioned { opacity:0.55; }
+.checklist-item.actioned span.ci-text { text-decoration:line-through; color:var(--text-dim); }
+.ci-done-tag { display:none; font-size:9px; font-weight:700; color:var(--green);
+  background:var(--green-bg); border:1px solid #a8d8b8; border-radius:2px;
+  padding:1px 5px; margin-left:8px; vertical-align:middle; }
+.checklist-item.actioned .ci-done-tag { display:inline; }
+
+/* Status banner */
+.action-banner { display:none; padding:9px 14px; border-radius:2px; font-size:12px;
+  font-weight:600; margin-bottom:10px; border:1px solid; align-items:center; gap:10px; }
+.action-banner.visible { display:flex; }
+.action-banner.inprogress { background:var(--amber-bg); border-color:#eed8a0; color:#7a5000; }
+.action-banner.resolved { background:var(--green-bg); border-color:#a8d8b8; color:#0f5c2e; }
+.action-banner-icon { font-size:14px; flex-shrink:0; }
+.action-banner-text { flex:1; }
+.action-banner-time { font-size:10px; font-weight:400; opacity:0.75; margin-left:4px; }
+
+/* Mark as Resolved button */
+.resolve-btn { background:var(--green); color:#fff; border:none; padding:6px 14px;
+  font-size:12px; font-weight:700; border-radius:2px; cursor:pointer; font-family:inherit;
+  margin-left:auto; flex-shrink:0; }
+.resolve-btn:hover { background:#155e30; }
+.resolve-btn:disabled { background:#a8d8b8; cursor:default; }
+.unresolve-btn { background:none; border:1px solid var(--border); color:var(--text-dim);
+  padding:4px 10px; font-size:11px; border-radius:2px; cursor:pointer; font-family:inherit; margin-left:8px; }
+.unresolve-btn:hover { background:var(--row-alt); }
+
+/* Action pill in tables */
+.action-pill { font-size:10px; padding:2px 7px; border-radius:2px; font-weight:700;
+  display:inline-block; white-space:nowrap; }
+.action-pill.inprogress { background:var(--amber-bg); color:var(--amber); border:1px solid #eed8a0; }
+.action-pill.resolved   { background:var(--green-bg); color:var(--green); border:1px solid #a8d8b8; }
+.action-pill.escalated  { background:var(--blue-bg);  color:var(--blue);  border:1px solid #c5d8ea; }
+.action-pill.awaiting   { background:#f5f0ff; color:#6b3fa0; border:1px solid #d4b8f0; }
+.action-pill.noaction   { background:#f4f6f9; color:var(--text-dim); border:1px solid var(--border); }
+.action-pill.none       { display:none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SCREEN 1 — MAIN DASHBOARD ═══════════════ -->
+<div id="screen1" class="screen visible">
+
+  <!-- Dev Banner -->
+  <div class="dev-banner">Development Mode</div>
+
+  <!-- Top Nav -->
+  <div class="top-nav">
+    <div class="wk-logo">
+      <div class="wk-dots">
+        <div class="wk-dot d1"></div><div class="wk-dot d2"></div>
+        <div class="wk-dot d3"></div><div class="wk-dot d4"></div>
+      </div>
+      <span class="wk-name">Wolters Kluwer</span>
+    </div>
+    <span class="wk-pipe">|</span>
+    <span class="app-label">Matter &amp; Spend</span>
+    <div class="top-right">
+      <button class="sub-btn">SUBMITTED ▾</button>
+      <span class="top-icon">🖨</span>
+      <span class="top-icon">❓</span>
+      <span class="top-icon">🔔</span>
+      <div class="user-chip">
+        <div class="user-av">👤</div>
+        <span>System System</span>
+      </div>
+      <span class="top-icon">⬛</span>
+    </div>
+  </div>
+
+  <!-- Second Nav -->
+  <div class="second-nav">
+    <div class="icon-group">
+      <div class="nav-icon"><span class="ni">⊞</span><span>APPS</span></div>
+      <div class="nav-icon"><span class="ni">☰</span><span>MENU</span></div>
+      <div class="nav-icon"><span class="ni">🏠</span><span>HOME</span></div>
+    </div>
+    <div class="nav-tabs">
+      <div class="ntab">Matters</div>
+      <div class="ntab">Organizations</div>
+      <div class="ntab">People</div>
+      <div class="ntab orange">Invoices</div>
+      <div class="ntab">Documents</div>
+      <div class="ntab">Reports</div>
+      <div class="ntab risk active">⚡ Risk Intelligence</div>
+      <div class="ntab">★</div>
+    </div>
+    <div class="nav-search">
+      Search: <div class="nav-search-labels"><a>All</a> | <a>Documents</a> | <a>Invoices</a> | <a>...</a></div>
+      <input class="ns-input" type="text" placeholder="Documents, Invoices, Matter..."/>
+      🔍
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-wrap">
+
+    <!-- Page Header -->
+    <div class="page-hdr-bar">
+      <div class="page-title">Risk Intelligence Dashboard <small>Portfolio overview · Real-time</small></div>
+      <div class="page-controls">
+        <select class="pp-sel"><option>Portfolio: All</option><option>Employment</option><option>Litigation</option><option>IP / Patent</option></select>
+        <select class="pp-sel"><option>Q2 2026</option><option>Q1 2026</option><option>FY 2026</option></select>
+        <button class="pp-btn red" onclick="showScreen('screen2')">🔔 Alerts <span class="badge">3</span></button>
+        <button class="pp-btn">⬇ Export</button>
+      </div>
+    </div>
+
+    <!-- Stat Row -->
+    <div class="stat-row">
+      <div class="stat-w red clickable" onclick="showMatterList('critical')" title="Click to view all 8 Critical matters">
+        <div class="stat-w-hdr">Critical Matters</div>
+        <div class="stat-w-body">
+          <div class="stat-num red">8</div>
+          <div class="stat-detail">
+            <div class="stat-lbl">Require Action</div>
+            <div class="stat-sub">Budget &gt;25% over</div>
+            <div class="stat-trend trend-up">▲ +2 from last week</div>
+            <div class="stat-click-hint">Click to view matters →</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-w amber clickable" onclick="showMatterList('warning')" title="Click to view all 12 Warning matters">
+        <div class="stat-w-hdr">Warning Matters</div>
+        <div class="stat-w-body">
+          <div class="stat-num amber">12</div>
+          <div class="stat-detail">
+            <div class="stat-lbl">Monitor Closely</div>
+            <div class="stat-sub">Budget 10–25% over</div>
+            <div class="stat-trend trend-up">▲ +1 from last week</div>
+            <div class="stat-click-hint">Click to view matters →</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-w green clickable" onclick="showMatterList('healthy')" title="Click to view all 23 Healthy matters">
+        <div class="stat-w-hdr">Healthy Matters</div>
+        <div class="stat-w-body">
+          <div class="stat-num green">23</div>
+          <div class="stat-detail">
+            <div class="stat-lbl">On Track</div>
+            <div class="stat-sub">Within budget</div>
+            <div class="stat-trend trend-dn">▼ –1 from last week</div>
+            <div class="stat-click-hint">Click to view matters →</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-w blue clickable" onclick="showMatterList('all')" title="Click to view full portfolio">
+        <div class="stat-w-hdr">Avg. Risk Score</div>
+        <div class="stat-w-body">
+          <div class="stat-num blue">42</div>
+          <div class="stat-detail">
+            <div class="stat-lbl">/ 100 Portfolio</div>
+            <div class="stat-sub">Top risk: Budget Burn</div>
+            <div class="stat-trend trend-up">▲ +4 pts from Q1</div>
+            <div class="stat-click-hint">Click to view all matters →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout (full-width) -->
+    <div class="main-layout">
+      <!-- CENTER: Main Tab Panel (full width) -->
+      <div class="widget main-panel">
+        <div class="widget-hdr">
+          Matter Risk Overview
+          <div class="widget-icons">⊞ + ✕</div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('map',this)">🗺 Portfolio Map</button>
+        </div>
+
+        <!-- MAP TAB -->
+        <div id="tab-map" class="tab-content active">
+          <div class="filter-row">
+            <span class="flabel">Show:</span>
+            <button class="fbtn on red" id="fb-critical" onclick="toggleFilter('critical')" title="Click to toggle Critical matters">
+              <span class="fdot red"></span> Critical (8)
+            </button>
+            <button class="fbtn on amber" id="fb-warning" onclick="toggleFilter('warning')" title="Click to toggle Warning matters">
+              <span class="fdot amber"></span> Warning (12)
+            </button>
+            <button class="fbtn" id="fb-healthy" onclick="toggleFilter('healthy')" title="Click to toggle Healthy matters">
+              <span class="fdot green"></span> Healthy (23)
+            </button>
+            <div class="map-search">
+              <span class="map-search-icon">🔍</span>
+              <input type="text" id="map-search-input" placeholder="Search matter ID or name…" oninput="filterMapSearch(this.value)"/>
+            </div>
+          </div>
+          <div id="pp-map"></div>
+        </div>
+
+
+
+      </div>
+    </div><!-- end main-layout -->
+  </div><!-- end page-wrap -->
+</div><!-- end screen1 -->
+
+<!-- ═══════════════ SCREEN 1.5 — MATTER LIST ═══════════════ -->
+<div id="screen-list" class="screen">
+  <div class="dev-banner">Development Mode</div>
+  <div class="scr-chrome">
+    <button class="back-btn" onclick="showScreen('screen1')">← Back to Dashboard</button>
+    <span class="scr-title" id="ml-title">Matters</span>
+    <span id="ml-level-pill" style="display:none;"></span>
+  </div>
+  <div class="scr-body">
+    <div class="ml-table-wrap">
+      <table class="ml-tbl">
+        <thead>
+          <tr>
+            <th>Matter ID</th>
+            <th>Matter Name</th>
+            <th>Firm / Org</th>
+            <th>Type</th>
+            <th>Geography</th>
+            <th>Budget</th>
+            <th>Actual Spend</th>
+            <th>Overrun %</th>
+            <th>Action Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ml-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SCREEN 2 — AI BRIEFING ═══════════════ -->
+<div id="screen2" class="screen">
+  <div class="dev-banner">Development Mode</div>
+  <div class="scr-chrome">
+    <button class="back-btn" onclick="showScreen('screen1')">← Back to Dashboard</button>
+    <button class="back-btn" onclick="showScreen('screen-list')">← Critical Matters</button>
+    <span class="scr-title" id="s2-title">AI Risk Briefing — California Employment Cluster · Wilson LLP</span>
+    <span id="s2-status-pill" style="display:none;margin-left:10px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;border:1px solid currentColor;"></span>
+  </div>
+  <div class="scr-body">
+
+    <!-- Cluster Action Status Banner -->
+    <div class="action-banner" id="s2-banner" style="display:none;">
+      <span class="action-banner-icon" id="s2-banner-icon"></span>
+      <span class="action-banner-text" id="s2-banner-text"></span>
+      <button class="resolve-btn" id="s2-resolve-btn" style="display:none;" onclick="markClusterResolved()">✓ Mark Cluster as Resolved</button>
+      <button class="unresolve-btn" id="s2-unresolve-btn" style="display:none;" onclick="markClusterUnresolved()">Undo Resolved</button>
+    </div>
+
+    <!-- 1. Burn Bar Hero -->
+    <div class="bcard burn-section">
+      <div class="bcard-hdr">📊 Budget Burn — Matter #1042 · Smith v. Acme Corp</div>
+      <div class="bcard-body">
+        <div class="burn-hdr-row">
+          <span style="font-size:11px;color:var(--text-dim);">Jan → Dec 2026 &nbsp;·&nbsp; <strong style="color:var(--red);">▼ Apr (now)</strong></span>
+          <span style="font-size:12px;font-weight:700;color:var(--red);">$286K spent of $200K budget &nbsp;·&nbsp; +43% overrun &nbsp;·&nbsp; ~18 days remaining</span>
+        </div>
+        <div class="burn-months">
+          <span>Jan</span><span>Feb</span><span>Mar</span><span class="cur">Apr</span>
+          <span>May</span><span>Jun</span><span>Jul</span><span>Aug</span>
+          <span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+        </div>
+        <div class="burn-track">
+          <div class="burn-now" style="left:28%"></div>
+          <div class="burn-bar" style="width:50%;background:var(--red);">+43% over</div>
+        </div>
+        <div class="burn-legend">
+          <span style="color:var(--red);">█ Actual burn (exceeds budget)</span>
+          <span style="color:rgba(0,0,0,0.3);">▏ Current date (Apr)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. AI Narrative -->
+    <div class="bcard">
+      <div class="bcard-hdr">⚡ AI Risk Analysis — Automated by RiskRadar</div>
+      <div class="bcard-body">
+        <div class="ai-text">
+          3 matters in the California Employment cluster are tracking 40–43% over budget. The root cause is Wilson LLP —
+          a <strong>18% billing rate increase in Q3 2025</strong> with no corresponding rate card amendment in Passport.
+          Wilson LLP's blended rate is 23% above peer group average for Employment matters — the highest firm deviation in the portfolio.<br/><br/>
+          Invoice velocity has reached <strong>7 invoices in 14 days</strong> against a portfolio average of 2.
+          Matter #1042 will exhaust its remaining budget in approximately 18 days at current burn.
+          Immediate outside counsel review and budget reallocation are recommended.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Two-column: Risk Signals + Invoice Queue -->
+    <div class="two-col">
+      <div class="bcard">
+        <div class="bcard-hdr">Risk Signals — CA Employment Cluster</div>
+        <div class="bcard-body">
+          <div class="sig-row">
+            <div class="sig-lbl">Budget Burn</div>
+            <div class="sig-track"><div class="sig-fill red" style="width:89%">Critical</div></div>
+            <div class="sig-val red">89 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Invoice Velocity</div>
+            <div class="sig-track"><div class="sig-fill red" style="width:87%">Critical</div></div>
+            <div class="sig-val red">87 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Vendor Risk</div>
+            <div class="sig-track"><div class="sig-fill red" style="width:82%">Critical</div></div>
+            <div class="sig-val red">82 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Timeline Risk</div>
+            <div class="sig-track"><div class="sig-fill amber" style="width:55%">Watch</div></div>
+            <div class="sig-val amber">55 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Compliance</div>
+            <div class="sig-track"><div class="sig-fill amber" style="width:48%">Watch</div></div>
+            <div class="sig-val amber">48 / 100</div>
+          </div>
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid #edf2f7;font-size:11px;color:var(--text-dim);">Cluster average across 3 matters · Wilson LLP</div>
+        </div>
+      </div>
+      <div class="bcard">
+        <div class="bcard-hdr">🧾 Invoice Overview — CA Employment Cluster</div>
+        <div class="bcard-body" style="padding:12px 14px;">
+          <div style="display:flex;gap:0;margin-bottom:14px;">
+            <div style="flex:1;padding-right:16px;border-right:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Pending Approval</div>
+              <div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">4 invoices</div>
+              <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">New portfolio average · last 14 days</div>
+            </div>
+            <div style="flex:1;padding-left:16px;">
+              <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Highest Single Invoice</div>
+              <div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">$22K</div>
+              <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">in last 14 days</div>
+            </div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+            <thead>
+              <tr style="background:var(--card-hdr);">
+                <th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;letter-spacing:0.3px;border:1px solid var(--border);">Date</th>
+                <th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;letter-spacing:0.3px;border:1px solid var(--border);">Invoice</th>
+                <th style="padding:5px 8px;text-align:right;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;letter-spacing:0.3px;border:1px solid var(--border);">Amount</th>
+              </tr>
+            </thead>
+            <tbody style="font-size:11px;">
+              <tr>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 17</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2891 · <span style="color:var(--amber);font-weight:700;">Pending</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$18,400</td>
+              </tr>
+              <tr style="background:var(--row-alt);">
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 14</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2874 · <span style="color:var(--amber);font-weight:700;">Pending</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$19,200</td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Mar 15</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2741 · <span style="color:var(--green);font-weight:700;">Approved</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$22,100</td>
+              </tr>
+              <tr style="background:var(--row-alt);">
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Mar 2</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2698 · <span style="color:var(--green);font-weight:700;">Approved</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$21,300</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding:7px 10px;background:var(--red-bg);border:1px solid #f0c4c2;border-radius:2px;font-size:11px;color:var(--text);">⚠ Fee charge: Wilson LLP — <strong style="color:var(--red);">18% rate card update</strong> · Effective Mar 28</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Recommended Actions -->
+    <div class="bcard">
+      <div class="bcard-hdr">Recommended Actions</div>
+      <div class="bcard-body">
+        <div class="checklist-item" id="s2-ci-1"><input type="checkbox" onchange="onClusterActionCheck()"/> <span class="ci-text">Review rate card amendment for Wilson LLP — 18% rate increase not reflected in Passport</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="s2-ci-2"><input type="checkbox" onchange="onClusterActionCheck()"/> <span class="ci-text">Request revised budget estimate for Matter #1042 (Smith v. Acme Corp)</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="s2-ci-3"><input type="checkbox" onchange="onClusterActionCheck()"/> <span class="ci-text">Flag invoice velocity pattern to Legal Ops for formal review</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="s2-ci-4"><input type="checkbox" onchange="onClusterActionCheck()"/> <span class="ci-text">Consider budget reallocation from Monitor-quadrant matters to cover CA cluster</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="s2-ci-5"><input type="checkbox" onchange="onClusterActionCheck()"/> <span class="ci-text">Schedule outside counsel steering call with Wilson LLP this week</span><span class="ci-done-tag">✓ Actioned</span></div>
+      </div>
+    </div>
+
+    <!-- 5. Affected Matters Table -->
+    <div class="bcard">
+      <div class="bcard-hdr">Affected Matters — California Employment Cluster</div>
+      <div class="bcard-body" style="padding:0;">
+        <table class="pp-tbl">
+          <thead>
+            <tr><th>Matter ID</th><th>Matter Name</th><th>Organization</th><th>Type</th><th>Budget</th><th>Actual Spend</th><th>Overrun</th><th>Action Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mlink" onclick="showScreen('screen3')">#1042</span></td>
+              <td>Smith v. Acme Corp</td><td>Wilson LLP</td><td>Employment</td>
+              <td>$200,000</td><td style="color:var(--red);font-weight:700;">$286,000</td>
+              <td><span class="risk-pill red">🔴 +43%</span></td>
+              <td><span class="action-pill none" id="s2-pill-1042"></span><span style="font-size:10px;color:var(--text-dim);" id="s2-nopill-1042">—</span></td>
+            </tr>
+            <tr>
+              <td><span class="mlink" onclick="showScreen('screen3')">#1087</span></td>
+              <td>Davis v. Acme Corp</td><td>Wilson LLP</td><td>Employment</td>
+              <td>$150,000</td><td style="color:var(--red);font-weight:700;">$212,000</td>
+              <td><span class="risk-pill red">🔴 +41%</span></td>
+              <td><span style="font-size:10px;color:var(--text-dim);">—</span></td>
+            </tr>
+            <tr>
+              <td><span class="mlink" onclick="showScreen('screen3')">#1091</span></td>
+              <td>Garcia v. Acme</td><td>Wilson LLP</td><td>Employment</td>
+              <td>$80,000</td><td style="color:var(--amber);font-weight:700;">$109,000</td>
+              <td><span class="risk-pill amber">🟡 +36%</span></td>
+              <td><span style="font-size:10px;color:var(--text-dim);">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    </div><!-- /s2-dynamic-content -->
+  </div>
+</div>
+
+<!-- ═══════════════ SCREEN 3 — MATTER DETAIL ═══════════════ -->
+<div id="screen3" class="screen">
+  <div class="dev-banner">Development Mode</div>
+  <div class="scr-chrome">
+    <button class="back-btn" onclick="showScreen('screen1')">← Back to Dashboard</button>
+    <button class="back-btn" onclick="showScreen('screen-list')">← Critical Matters</button>
+    <span class="scr-title">Matter Detail — #1042 · Smith v. Acme Corp · Wilson LLP · Employment</span>
+  </div>
+  <div class="scr-body">
+
+    <!-- Action Status Banner -->
+    <div class="action-banner" id="s3-banner">
+      <span class="action-banner-icon" id="s3-banner-icon"></span>
+      <span class="action-banner-text" id="s3-banner-text"></span>
+      <button class="resolve-btn" id="s3-resolve-btn" onclick="markResolved()">✓ Mark as Resolved</button>
+      <button class="unresolve-btn" id="s3-unresolve-btn" style="display:none;" onclick="markUnresolved()">Undo Resolved</button>
+    </div>
+
+    <!-- 1. Burn Bar Hero -->
+    <div class="bcard burn-section">
+      <div class="bcard-hdr">📊 Budget Burn — Matter #1042 · Smith v. Acme Corp</div>
+      <div class="bcard-body">
+        <div class="burn-hdr-row">
+          <span style="font-size:11px;color:var(--text-dim);">Jan → Dec 2026 &nbsp;·&nbsp; <strong style="color:var(--red);">▼ Apr (now)</strong></span>
+          <span style="font-size:12px;font-weight:700;color:var(--red);">$286K spent of $200K budget &nbsp;·&nbsp; +43% overrun &nbsp;·&nbsp; ~18 days remaining</span>
+        </div>
+        <div class="burn-months">
+          <span>Jan</span><span>Feb</span><span>Mar</span><span class="cur">Apr</span>
+          <span>May</span><span>Jun</span><span>Jul</span><span>Aug</span>
+          <span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+        </div>
+        <div class="burn-track">
+          <div class="burn-now" style="left:28%"></div>
+          <div class="burn-bar" style="width:50%;background:var(--red);">+43% over</div>
+        </div>
+        <div class="burn-legend">
+          <span style="color:var(--red);">█ Actual burn (exceeds budget)</span>
+          <span style="color:rgba(0,0,0,0.3);">▏ Current date (Apr)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. AI Narrative -->
+    <div class="bcard">
+      <div class="bcard-hdr">⚡ AI Risk Analysis — Matter #1042</div>
+      <div class="bcard-body">
+        <div class="ai-text">
+          Outside counsel Wilson LLP has not updated their rate card, reflecting a <strong>18% billing rate increase</strong>
+          from Q3 2025 that is directly driving the +43% budget overrun on this matter.
+          Wilson LLP's blended rate for California Employment matters is 23% above the peer group average for firms handling Employment work in this jurisdiction — making this a market-rate issue, not just a billing error.<br/><br/>
+          At the current burn rate, the remaining $14K will be exhausted in <strong>approximately 18 days</strong>.
+          Rate card review and outside counsel escalation are the immediate priorities.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Two-column: Risk Signals + Invoice Queue -->
+    <div class="two-col">
+      <div class="bcard">
+        <div class="bcard-hdr">Risk Signals — Matter #1042</div>
+        <div class="bcard-body">
+          <div class="sig-row">
+            <div class="sig-lbl">Budget Burn</div>
+            <div class="sig-track"><div class="sig-fill red" style="width:92%">Critical</div></div>
+            <div class="sig-val red">92 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Invoice Velocity</div>
+            <div class="sig-track"><div class="sig-fill red" style="width:87%">Critical</div></div>
+            <div class="sig-val red">87 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Vendor Risk</div>
+            <div class="sig-track"><div class="sig-fill red" style="width:78%">Critical</div></div>
+            <div class="sig-val red">78 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Timeline Risk</div>
+            <div class="sig-track"><div class="sig-fill amber" style="width:52%">Watch</div></div>
+            <div class="sig-val amber">52 / 100</div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-lbl">Compliance</div>
+            <div class="sig-track"><div class="sig-fill amber" style="width:45%">Watch</div></div>
+            <div class="sig-val amber">45 / 100</div>
+          </div>
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid #edf2f7;font-size:11px;color:var(--text-dim);">Scored 0–100: budget overrun rate, invoice frequency, rate card deviation, deadline proximity, vendor concentration.</div>
+        </div>
+      </div>
+      <div class="bcard">
+        <div class="bcard-hdr">🧾 Invoice Overview — Matter #1042</div>
+        <div class="bcard-body" style="padding:12px 14px;">
+          <div style="display:flex;gap:0;margin-bottom:14px;">
+            <div style="flex:1;padding-right:16px;border-right:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Pending Approval</div>
+              <div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">2 invoices</div>
+              <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">New portfolio average · last 14 days</div>
+            </div>
+            <div style="flex:1;padding-left:16px;">
+              <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Highest Single Invoice</div>
+              <div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">$22K</div>
+              <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">in last 14 days</div>
+            </div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+            <thead>
+              <tr style="background:var(--card-hdr);">
+                <th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;letter-spacing:0.3px;border:1px solid var(--border);">Date</th>
+                <th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;letter-spacing:0.3px;border:1px solid var(--border);">Invoice</th>
+                <th style="padding:5px 8px;text-align:right;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;letter-spacing:0.3px;border:1px solid var(--border);">Amount</th>
+              </tr>
+            </thead>
+            <tbody style="font-size:11px;">
+              <tr>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 17</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2891 · <span style="color:var(--amber);font-weight:700;">Pending</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$18,400</td>
+              </tr>
+              <tr style="background:var(--row-alt);">
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 14</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2874 · <span style="color:var(--amber);font-weight:700;">Pending</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$19,200</td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Mar 15</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2741 · <span style="color:var(--green);font-weight:700;">Approved</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$22,100</td>
+              </tr>
+              <tr style="background:var(--row-alt);">
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">Mar 2</td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2698 · <span style="color:var(--green);font-weight:700;">Approved</span></td>
+                <td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$21,300</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding:7px 10px;background:var(--red-bg);border:1px solid #f0c4c2;border-radius:2px;font-size:11px;color:var(--text);">⚠ Fee charge: Wilson LLP — <strong style="color:var(--red);">18% rate card update</strong> · Effective Mar 28</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget History Card -->
+    <div class="bcard">
+      <div class="bcard-hdr">📅 Budget History — Matter #1042 · Smith v. Acme Corp</div>
+      <div class="bcard-body" style="padding:14px 16px;">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px;">
+          <thead><tr style="background:var(--card-hdr);">
+            <th style="padding:6px 10px;border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;">Revision</th>
+            <th style="padding:6px 10px;border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;">Date</th>
+            <th style="padding:6px 10px;border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;">Amount</th>
+            <th style="padding:6px 10px;border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;">Reason</th>
+            <th style="padding:6px 10px;border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;">Approved By</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;"><span style="font-weight:700;color:var(--text-dim);">ORIGINAL</span></td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">Jan 14, 2026</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;font-weight:700;">$200,000</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;color:var(--text-dim);">Initial approved budget</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;color:var(--text-dim);">M. Chen</td>
+            </tr>
+            <tr style="background:var(--row-alt);">
+              <td style="padding:6px 10px;border:1px solid #edf2f7;"><span style="font-weight:700;color:var(--amber);">REV 1</span></td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">Feb 28, 2026</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;font-weight:700;color:var(--amber);">+$80,000</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">Scope expansion — additional depositions required</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">M. Chen</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;"><span style="font-weight:700;color:var(--amber);">REV 2</span></td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">Apr 1, 2026</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;font-weight:700;color:var(--amber);">+$40,000</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">Expert witness costs — two additional experts engaged</td>
+              <td style="padding:6px 10px;border:1px solid #edf2f7;">M. Chen</td>
+            </tr>
+            <tr style="background:#eef4fb;">
+              <td style="padding:6px 10px;border:1px solid #c5d8ea;"><span style="font-weight:700;color:var(--blue);">CURRENT</span></td>
+              <td style="padding:6px 10px;border:1px solid #c5d8ea;">Apr 1, 2026</td>
+              <td style="padding:6px 10px;border:1px solid #c5d8ea;font-weight:700;color:var(--blue);">$320,000 approved</td>
+              <td style="padding:6px 10px;border:1px solid #c5d8ea;">$34,000 remaining at current burn</td>
+              <td style="padding:6px 10px;border:1px solid #c5d8ea;color:var(--text-dim);">Active</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;padding:10px 12px;background:var(--red-bg);border:1px solid #f0c4c2;border-radius:2px;font-size:12px;">
+            🔴 <strong style="color:var(--red);">Reallocation Risk</strong><br/>
+            <span style="color:var(--text-dim);">At current burn rate, a <strong>3rd budget revision is projected by ~May 25</strong>. Without rate card correction, each additional month adds ~$22K in unplanned spend.</span>
+          </div>
+          <div style="flex:1;min-width:260px;padding:10px 12px;background:#eef4fb;border:1px solid #c5d8ea;border-radius:2px;font-size:12px;">
+            💡 <strong style="color:var(--blue);">Advisory</strong><br/>
+            <span style="color:var(--text-dim);">Resolve the Wilson LLP rate card violation <strong>before approving further reallocation</strong>. Correcting the 18% overcharge could reduce future invoices by approximately <strong>~$12K/month</strong>.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Recommended Actions -->
+    <div class="bcard">
+      <div class="bcard-hdr">Recommended Actions — Matter #1042</div>
+      <div class="bcard-body">
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;font-style:italic;">Actions ordered by priority — check each as completed</div>
+        <div class="checklist-item" id="ci-1"><input type="checkbox" onchange="onActionCheck()"/> <span class="ci-text"><strong style="color:var(--red);">1.</strong> Resolve Wilson LLP rate card violation in Passport <em>before</em> approving any further budget reallocation</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="ci-2"><input type="checkbox" onchange="onActionCheck()"/> <span class="ci-text"><strong style="color:var(--red);">2.</strong> Place spend hold on pending INV-4421 — do not approve until rate card is resolved</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="ci-3"><input type="checkbox" onchange="onActionCheck()"/> <span class="ci-text"><strong style="color:var(--amber);">3.</strong> Request itemised scope justification from Wilson LLP before approving a 3rd budget revision</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="ci-4"><input type="checkbox" onchange="onActionCheck()"/> <span class="ci-text"><strong style="color:var(--amber);">4.</strong> Evaluate reallocation from a lower-priority matter (Monitor quadrant) to cover CA cluster exposure</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="ci-5"><input type="checkbox" onchange="onActionCheck()"/> <span class="ci-text"><strong style="color:var(--text-dim);">5.</strong> Escalate to General Counsel if total exposure across CA Employment cluster exceeds $750K</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item" id="ci-6"><input type="checkbox" onchange="onActionCheck()"/> <span class="ci-text"><strong style="color:var(--text-dim);">6.</strong> Notify Brian (Legal Bill Reviewer) to hold all pending Wilson LLP invoices across the portfolio</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #edf2f7;">
+          <a href="#" onclick="return false;" style="display:inline-block;background:var(--hdr);color:#fff;font-size:12px;font-weight:700;padding:7px 16px;border-radius:2px;text-decoration:none;">🔗 Open Matter #1042 in Passport — Budget Tab →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Other Matters in Same Cluster -->
+    <!-- Activity Timeline -->
+    <div class="bcard">
+      <div class="bcard-hdr">🕐 Activity Timeline — Matter #1042</div>
+      <div class="bcard-body" style="padding:14px 16px;">
+        <div style="position:relative;padding-left:20px;border-left:2px solid #c5d8ea;">
+
+          <!-- Apr 17 — Invoice -->
+          <div style="position:relative;margin-bottom:16px;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--amber);border:2px solid #fff;box-shadow:0 0 0 1px var(--amber);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Apr 17, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">INV-2891 submitted · $18,400 · <span style="color:var(--amber);">Pending Approval</span></div>
+            <div style="font-size:11px;color:var(--text-dim);">Wilson LLP · Employment services · Apr 1–15</div>
+          </div>
+
+          <!-- Apr 14 — Invoice -->
+          <div style="position:relative;margin-bottom:16px;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--amber);border:2px solid #fff;box-shadow:0 0 0 1px var(--amber);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Apr 14, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">INV-2874 submitted · $19,200 · <span style="color:var(--amber);">Pending Approval</span></div>
+            <div style="font-size:11px;color:var(--text-dim);">Wilson LLP · Deposition support · Mar 28–Apr 13</div>
+          </div>
+
+          <!-- Apr 1 — Budget Revision 2 -->
+          <div style="position:relative;margin-bottom:16px;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--amber);border:2px solid #fff;box-shadow:0 0 0 1px var(--amber);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Apr 1, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">⚠ Budget Revision 2 approved · <span style="color:var(--amber);">+$40,000</span></div>
+            <div style="font-size:11px;color:var(--text-dim);">Expert witness costs — two additional experts engaged · Approved by M. Chen</div>
+          </div>
+
+          <!-- Mar 28 — Rate violation -->
+          <div style="position:relative;margin-bottom:16px;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1px var(--red);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Mar 28, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">🔴 Rate card violation detected · Wilson LLP · <span style="color:var(--red);">+18% above approved</span></div>
+            <div style="font-size:11px;color:var(--text-dim);">Effective Mar 28 · No rate card amendment submitted to Passport</div>
+          </div>
+
+          <!-- Mar 15 — Invoice Approved -->
+          <div style="position:relative;margin-bottom:16px;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 0 0 1px var(--green);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Mar 15, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">INV-2741 approved · $22,100 · <span style="color:var(--green);">Approved</span></div>
+            <div style="font-size:11px;color:var(--text-dim);">Wilson LLP · Trial preparation · Mar 1–14</div>
+          </div>
+
+          <!-- Feb 28 — Budget Revision 1 -->
+          <div style="position:relative;margin-bottom:16px;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--amber);border:2px solid #fff;box-shadow:0 0 0 1px var(--amber);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Feb 28, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">⚠ Budget Revision 1 approved · <span style="color:var(--amber);">+$80,000</span></div>
+            <div style="font-size:11px;color:var(--text-dim);">Scope expansion — additional depositions required · Approved by M. Chen</div>
+          </div>
+
+          <!-- Jan 14 — Matter opened -->
+          <div style="position:relative;">
+            <div style="position:absolute;left:-25px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--hdr);border:2px solid #fff;box-shadow:0 0 0 1px var(--hdr);"></div>
+            <div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Jan 14, 2026</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px;">Matter #1042 opened · Budget $200,000 approved</div>
+            <div style="font-size:11px;color:var(--text-dim);">Smith v. Acme Corp · Wilson LLP · Employment · Los Angeles, CA</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Matters in Same Cluster -->
+    <div class="bcard">
+      <div class="bcard-hdr" style="font-size:12px;font-weight:600;letter-spacing:0.3px;">Other Matters — Wilson LLP · CA Employment Cluster</div>
+      <div class="bcard-body" style="padding:0;">
+        <table class="pp-tbl">
+          <thead>
+            <tr><th>Matter ID</th><th>Matter Name</th><th>Organization</th><th>Type</th><th>Budget</th><th>Actual Spend</th><th>Overrun</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mlink" onclick="showScreen('screen3')">#1087</span></td>
+              <td>Davis v. Acme Corp</td><td>Wilson LLP</td><td>Employment</td>
+              <td>$150,000</td><td style="color:var(--red);font-weight:700;">$212,000</td>
+              <td><span class="risk-pill red">🔴 +41%</span></td>
+            </tr>
+            <tr>
+              <td><span class="mlink" onclick="showScreen('screen3')">#1091</span></td>
+              <td>Garcia v. Acme</td><td>Wilson LLP</td><td>Employment</td>
+              <td>$80,000</td><td style="color:var(--amber);font-weight:700;">$109,000</td>
+              <td><span class="risk-pill amber">🟡 +36%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- ── SCRIPTS ── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+/* ════════════════════════════════════
+   MATTERS DATA
+════════════════════════════════════ */
+const matters = [
+  // Critical
+  {id:'M2034',name:'Employment Class Action',firm:'Wilson LLP',type:'Employment',geo:'Los Angeles, CA',lat:34.05,lng:-118.24,budget:300000,actual:430000,level:'critical'},
+  {id:'M2011',name:'Securities Litigation',firm:'Baker McKenzie',type:'Litigation',geo:'New York, NY',lat:40.71,lng:-74.00,budget:500000,actual:730000,level:'critical'},
+  {id:'M1033',name:'Patent Infringement A',firm:'Jones Day',type:'IP/Patent',geo:'San Francisco, CA',lat:37.77,lng:-122.41,budget:250000,actual:423000,level:'critical'},
+  {id:'M1055',name:'NDA Dispute — TechCo',firm:'Wilson LLP',type:'IP/Patent',geo:'San Jose, CA',lat:37.33,lng:-121.88,budget:120000,actual:187000,level:'critical'},
+  {id:'M4044',name:'IP — Miami',firm:'Greenberg Traurig',type:'IP/Patent',geo:'Miami, FL',lat:25.76,lng:-80.19,budget:200000,actual:302000,level:'critical'},
+  {id:'M2071',name:'Regulatory — FDA Review',firm:'Covington & Burling',type:'Regulatory',geo:'Washington, DC',lat:38.89,lng:-77.03,budget:180000,actual:269000,level:'critical'},
+  {id:'M1042',name:'Smith v. Acme Corp',firm:'Wilson LLP',type:'Employment',geo:'Los Angeles, CA',lat:34.05,lng:-118.35,budget:200000,actual:286000,level:'critical'},
+  {id:'M1087',name:'Davis v. Acme Corp',firm:'Wilson LLP',type:'Employment',geo:'Los Angeles, CA',lat:34.10,lng:-118.22,budget:150000,actual:212000,level:'critical'},
+  // Warning
+  {id:'M5022',name:'Antitrust — Chicago',firm:'Sidley Austin',type:'Antitrust',geo:'Chicago, IL',lat:41.87,lng:-87.62,budget:400000,actual:456000,level:'warning'},
+  {id:'M2058',name:'Antitrust — Distribution',firm:'Sidley Austin',type:'Antitrust',geo:'Chicago, IL',lat:41.88,lng:-87.68,budget:350000,actual:392000,level:'warning'},
+  {id:'M3011',name:'Contract Dispute — Dallas',firm:'Baker McKenzie',type:'Commercial',geo:'Dallas, TX',lat:32.77,lng:-96.79,budget:180000,actual:200000,level:'warning'},
+  {id:'M3089',name:'Environmental — Houston',firm:'Vinson & Elkins',type:'Environmental',geo:'Houston, TX',lat:29.76,lng:-95.36,budget:220000,actual:246000,level:'warning'},
+  {id:'M4201',name:'Labor Dispute — Seattle',firm:'Perkins Coie',type:'Employment',geo:'Seattle, WA',lat:47.60,lng:-122.33,budget:130000,actual:147000,level:'warning'},
+  {id:'M6001',name:'M&A Review — Boston',firm:'Ropes & Gray',type:'Corporate',geo:'Boston, MA',lat:42.36,lng:-71.05,budget:600000,actual:664000,level:'warning'},
+  {id:'M7033',name:'Insurance Dispute — Phoenix',firm:'Snell & Wilmer',type:'Insurance',geo:'Phoenix, AZ',lat:33.44,lng:-112.07,budget:90000,actual:102000,level:'warning'},
+  {id:'M8012',name:'Product Liability — Denver',firm:'Holland & Hart',type:'Litigation',geo:'Denver, CO',lat:39.73,lng:-104.99,budget:160000,actual:178000,level:'warning'},
+  {id:'M9001',name:'Trade Secret — Austin',firm:'Haynes Boone',type:'IP/Patent',geo:'Austin, TX',lat:30.26,lng:-97.74,budget:145000,actual:163000,level:'warning'},
+  {id:'M9100',name:'False Claims — DC',firm:'Covington & Burling',type:'Regulatory',geo:'Washington, DC',lat:38.90,lng:-77.06,budget:280000,actual:306000,level:'warning'},
+  {id:'M1091',name:'Garcia v. Acme',firm:'Wilson LLP',type:'Employment',geo:'Los Angeles, CA',lat:34.07,lng:-118.30,budget:80000,actual:109000,level:'warning'},
+  {id:'M2099',name:'Trademark — NY',firm:'Baker McKenzie',type:'IP/Patent',geo:'New York, NY',lat:40.73,lng:-73.99,budget:95000,actual:108000,level:'warning'},
+  // Healthy
+  {id:'M3300',name:'Compliance Review — Atlanta',firm:'King & Spalding',type:'Regulatory',geo:'Atlanta, GA',lat:33.74,lng:-84.38,budget:200000,actual:82000,level:'healthy'},
+  {id:'M4400',name:'Real Estate — Chicago',firm:'Sidley Austin',type:'Commercial',geo:'Chicago, IL',lat:41.85,lng:-87.65,budget:150000,actual:61000,level:'healthy'},
+  {id:'M5500',name:'Employment Counsel — SF',firm:'Littler Mendelson',type:'Employment',geo:'San Francisco, CA',lat:37.78,lng:-122.43,budget:80000,actual:22000,level:'healthy'},
+  {id:'M6600',name:'M&A Advisory — NY',firm:'Simpson Thacher',type:'Corporate',geo:'New York, NY',lat:40.74,lng:-74.00,budget:500000,actual:188000,level:'healthy'},
+  {id:'M7700',name:'Patent Portfolio — Seattle',firm:'Perkins Coie',type:'IP/Patent',geo:'Seattle, WA',lat:47.61,lng:-122.35,budget:120000,actual:41000,level:'healthy'},
+  {id:'M8800',name:'Contract Review — Boston',firm:'Ropes & Gray',type:'Commercial',geo:'Boston, MA',lat:42.37,lng:-71.03,budget:60000,actual:18000,level:'healthy'},
+  {id:'M9900',name:'HR Policy — Dallas',firm:'Littler Mendelson',type:'Employment',geo:'Dallas, TX',lat:32.78,lng:-96.82,budget:45000,actual:12000,level:'healthy'},
+];
+
+let map, clusterLayer;
+let showCritical = true, showWarning = true, showHealthy = false;
+
+const COLOR = { critical:'#c0392b', warning:'#b7770d', healthy:'#1a7a3c' };
+const FMT = n => '$'+Math.round(n/1000)+'K';
+const PCT = (a,b) => Math.round((a-b)/b*100);
+
+/* ── SCREEN NAVIGATION ── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  if (id === 'screen1') {
+    if (!map) initMap();
+    else setTimeout(() => map.invalidateSize(), 50);
+  }
+}
+
+/* ── TABS ── */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); });
+  btn.classList.add('active');
+  const content = document.getElementById('tab-'+tab);
+  content.classList.add('active');
+  if (tab === 'map' && !map) initMap();
+  if (tab === 'matrix') { renderMatrix(); updateMatrixBadge(); }
+}
+
+function updateMatrixBadge() {
+  const actNow = matters.filter(m=>{
+    const pct=PCT(m.actual,m.budget); const medSpend=matters.map(x=>x.actual).sort((a,b)=>a-b)[Math.floor(matters.length/2)];
+    return m.actual>=medSpend && pct>=15;
+  }).length;
+  const btn = document.getElementById('tab-btn-matrix');
+  if(btn) btn.innerHTML = `🎯 Risk Matrix <span style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;margin-left:4px;">${actNow} Act Now</span>`;
+}
+
+/* ── MATTER LIST (stat card click) ── */
+function showMatterList(level) {
+  let filtered = level === 'all' ? matters : matters.filter(m => m.level === level);
+  // M1042 always first — it has the complete demo flow
+  filtered = [filtered.find(m => m.id === 'M1042'), ...filtered.filter(m => m.id !== 'M1042')].filter(Boolean);
+  const labels = { critical:'Critical Matters — Budget >25% Over', warning:'Warning Matters — Budget 10–25% Over', healthy:'Healthy Matters — Within Budget', all:'All Matters — Full Portfolio' };
+  const colors = { critical:'var(--red)', warning:'var(--amber)', healthy:'var(--green)', all:'var(--blue)' };
+  const pillBg = { critical:'#c0392b', warning:'#b7770d', healthy:'#1a7a3c', all:'#1e5f9c' };
+  document.getElementById('ml-title').textContent = labels[level];
+  document.getElementById('ml-title').style.color = colors[level];
+  const pill = document.getElementById('ml-level-pill');
+  if (pill) { pill.style.display = ''; pill.innerHTML = `<span style="background:${pillBg[level]};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;margin-left:6px;">${level.charAt(0).toUpperCase()+level.slice(1)}</span>`; }
+
+  const rows = filtered.map(m => {
+    const pct = PCT(m.actual, m.budget);
+    const overrunColor = pct > 25 ? 'var(--red)' : pct > 0 ? 'var(--amber)' : 'var(--green)';
+    const st = getActionStatus(m.id);
+    const isDemo = m.id === 'M1042';
+    return `<tr${isDemo ? ' style="background:#fffbf0;"' : ''}>
+      <td style="font-weight:700;color:var(--nav-active);">${m.id}</td>
+      <td>${m.name}${isDemo ? ' <span style="font-size:9px;background:#1e5f9c;color:#fff;padding:1px 5px;border-radius:2px;margin-left:4px;">FULL DEMO</span>' : ''}</td>
+      <td>${m.firm}</td>
+      <td style="color:var(--text-dim);">${m.type}</td>
+      <td style="color:var(--text-dim);">${m.geo}</td>
+      <td>${FMT(m.budget)}</td>
+      <td style="font-weight:700;">${FMT(m.actual)}</td>
+      <td style="font-weight:800;color:${overrunColor};">${pct > 0 ? '+' + pct + '%' : pct + '%'}</td>
+      <td><span class="action-pill ${st.cls}" style="font-size:11px;padding:3px 8px;">${st.pill}</span></td>
+      <td><span class="mlink" onclick="openBriefing('${m.id}')">⚡ View AI Briefing →</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('ml-tbody').innerHTML = rows;
+  showScreen('screen-list');
+}
+
+function goToRiskMatrix() {
+  showScreen('screen1');
+  setTimeout(() => {
+    const btn = document.getElementById('tab-btn-matrix');
+    if(btn) { switchTab('matrix', btn); }
+  }, 50);
+}
+
+/* ── FILTER ── */
+function filterLevel(level) {
+  if (level==='critical') {
+    showCritical = !showCritical;
+    const btn = document.getElementById('fb-critical');
+    btn.classList.toggle('on', showCritical);
+    btn.classList.toggle('red', showCritical);
+  }
+  if (level==='warning') {
+    showWarning = !showWarning;
+    const btn = document.getElementById('fb-warning');
+    btn.classList.toggle('on', showWarning);
+    btn.classList.toggle('amber', showWarning);
+  }
+  if (level==='healthy') {
+    showHealthy = !showHealthy;
+    const btn = document.getElementById('fb-healthy');
+    btn.classList.toggle('on', showHealthy);
+    btn.classList.toggle('green', showHealthy);
+  }
+  applyMapFilter();
+}
+function toggleFilter(level) { filterLevel(level); }
+
+/* ── MAP ── */
+function initMap() {
+  map = L.map('pp-map', {center:[38,-97], zoom:4, zoomControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; OpenStreetMap contributors', maxZoom:19
+  }).addTo(map);
+  setTimeout(() => map.invalidateSize(), 100);
+  clusterLayer = L.markerClusterGroup({
+    maxClusterRadius:60, spiderfyOnMaxZoom:true,
+    iconCreateFunction: cluster => {
+      const marks = cluster.getAllChildMarkers();
+      const worst = marks.some(m=>m.options.level==='critical') ? 'critical' :
+                    marks.some(m=>m.options.level==='warning') ? 'warning' : 'healthy';
+      const c = COLOR[worst];
+      return L.divIcon({
+        html:`<div style="background:${c};color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3)">${cluster.getChildCount()}</div>`,
+        className:'', iconSize:[34,34]
+      });
+    }
+  });
+  applyMapFilter();
+  map.addLayer(clusterLayer);
+}
+
+function applyMapFilter() {
+  if (!clusterLayer) return;
+  clusterLayer.clearLayers();
+  matters.forEach(m => {
+    if (m.level==='critical' && !showCritical) return;
+    if (m.level==='warning'  && !showWarning)  return;
+    if (m.level==='healthy'  && !showHealthy)  return;
+    if (searchTerm && !m.id.toLowerCase().includes(searchTerm) && !m.name.toLowerCase().includes(searchTerm) && !m.firm.toLowerCase().includes(searchTerm)) return;
+    const c = COLOR[m.level];
+    const pct = PCT(m.actual, m.budget);
+    const pulse = m.level==='critical' ? 'class="pulse-marker"' : '';
+    const sz = m.level==='critical' ? 18 : 14;
+    const riskLabel = m.level==='critical' ? '🔴 Critical' : m.level==='warning' ? '🟡 Warning' : '🟢 Healthy';
+    const icon = L.divIcon({
+      html:`<div ${pulse} style="background:${c};width:${sz}px;height:${sz}px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.45);cursor:pointer;"></div>`,
+      className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2]
+    });
+    const mk = L.marker([m.lat,m.lng],{icon, level:m.level});
+    mk.bindTooltip(`
+      <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:12px;min-width:180px;">
+        <div style="font-weight:700;color:#1a3d5f;margin-bottom:4px;">${m.id} — ${m.name}</div>
+        <div style="font-size:11px;color:#6b7c8d;margin-bottom:2px;">${m.firm} · ${m.type}</div>
+        <div style="font-size:11px;margin-bottom:2px;">Budget: <strong>${FMT(m.budget)}</strong> &nbsp;·&nbsp; Actual: <strong style="color:${pct>25?'#c0392b':'#b7770d'}">${FMT(m.actual)}</strong></div>
+        <div style="font-size:11px;font-weight:700;color:${pct>25?'#c0392b':'#b7770d'};margin-bottom:5px;">Overrun: +${pct}%</div>
+        <div style="font-size:10px;color:#1e5f9c;font-weight:600;">${riskLabel} &nbsp;·&nbsp; Click for AI Briefing →</div>
+      </div>
+    `, {permanent:false, direction:'top', className:'pp-tooltip', offset:[0, -(sz/2+4)]});
+    mk.bindPopup(`
+      <div style="min-width:220px;font-family:'Segoe UI',Arial,sans-serif;">
+        <div class="pp-popup-title">${m.id} — ${m.name}</div>
+        <div class="pp-popup-row"><span class="pp-popup-lbl">Firm</span><span class="pp-popup-val">${m.firm}</span></div>
+        <div class="pp-popup-row"><span class="pp-popup-lbl">Type</span><span class="pp-popup-val">${m.type}</span></div>
+        <div class="pp-popup-row"><span class="pp-popup-lbl">Budget</span><span class="pp-popup-val">${FMT(m.budget)}</span></div>
+        <div class="pp-popup-row"><span class="pp-popup-lbl">Actual Spend</span><span class="pp-popup-val ${pct>25?'red':'amber'}">${FMT(m.actual)}</span></div>
+        <div class="pp-popup-row"><span class="pp-popup-lbl">Overrun</span><span class="pp-popup-val ${pct>25?'red':'amber'}">+${pct}%</span></div>
+        <div class="pp-popup-row"><span class="pp-popup-lbl">Risk Level</span><span class="pp-popup-val">${riskLabel}</span></div>
+        <div style="margin-top:8px;padding-top:7px;border-top:1px solid #e2e8f0;">
+          <span onclick="showScreen('screen2')" style="color:#1e5f9c;cursor:pointer;font-size:12px;font-weight:700;text-decoration:underline;">⚡ View AI Briefing &amp; Actions →</span>
+        </div>
+      </div>
+    `, {className:'pp-popup'});
+    clusterLayer.addLayer(mk);
+  });
+}
+
+/* ── FIRM EXPOSURE ── */
+function renderFirms() {
+  const firms = {};
+  matters.forEach(m => {
+    if (!firms[m.firm]) firms[m.firm]={name:m.firm,spend:0,critical:0,warning:0,healthy:0};
+    firms[m.firm].spend += m.actual;
+    firms[m.firm][m.level]++;
+  });
+  const sorted = Object.values(firms).sort((a,b)=>b.spend-a.spend);
+  const maxSpend = sorted[0].spend;
+  let html = '';
+  sorted.forEach((f,i) => {
+    const tot = f.critical+f.warning+f.healthy;
+    const critW = f.critical/tot*100, warnW = f.warning/tot*100, hltW = f.healthy/tot*100;
+    const pills = [
+      f.critical ? `<span class="rpill red">🔴 ${f.critical} Crit</span>`:'',
+      f.warning  ? `<span class="rpill amber">🟡 ${f.warning} Warn</span>`:'',
+      f.healthy  ? `<span class="rpill green">🟢 ${f.healthy} OK</span>`:''
+    ].filter(Boolean).join('');
+    html += `<div class="firm-row">
+      <div class="firm-rank">${i+1}</div>
+      <div class="firm-name mlink" title="${f.name}" onclick="showScreen('screen2')">${f.name}</div>
+      <div class="firm-bar-wrap">
+        <div class="fb-seg red" style="width:${critW}%"></div>
+        <div class="fb-seg amber" style="width:${warnW}%"></div>
+        <div class="fb-seg green" style="width:${hltW}%"></div>
+      </div>
+      <div class="firm-spend">${FMT(f.spend)}</div>
+      <div class="firm-pills">${pills}</div>
+    </div>`;
+  });
+  document.getElementById('firm-rows').innerHTML = html;
+}
+
+/* ── RISK MATRIX ── */
+function renderMatrix() {
+  const spends = matters.map(m=>m.actual).sort((a,b)=>a-b);
+  const medSpend = spends[Math.floor(spends.length/2)];
+  const threshold = 15;
+  const quads = { actNow:[], watch:[], review:[], monitor:[] };
+  matters.forEach(m => {
+    const pct = PCT(m.actual,m.budget);
+    const hiSpend = m.actual >= medSpend;
+    const hiOverrun = pct >= threshold;
+    if (hiSpend && hiOverrun) quads.actNow.push(m);
+    else if (!hiSpend && hiOverrun) quads.watch.push(m);
+    else if (hiSpend && !hiOverrun) quads.review.push(m);
+    else quads.monitor.push(m);
+  });
+
+  function quadHTML(items, cls, title, icon, axis) {
+    const itemsHTML = items.slice(0,8).map(m=>`
+      <div class="mitem">
+        <span class="mitem-id">${m.id}</span>
+        <span class="mlink" onclick="showScreen('screen2')" style="font-size:10px;">${m.name.length>20?m.name.substring(0,20)+'…':m.name}</span>
+        <span style="float:right;font-weight:700;color:${PCT(m.actual,m.budget)>25?'var(--red)':'var(--amber)'}">+${PCT(m.actual,m.budget)}%</span>
+      </div>`).join('');
+    return `<div class="mquad ${cls}">
+      <div class="mquad-title ${icon.includes('🔴')?'red':icon.includes('🟡')?'amber':icon.includes('🔵')?'blue':'green'}">${icon} ${title}</div>
+      <div class="mquad-axis">${axis}</div>
+      <div class="mquad-count">${items.length} matter${items.length!==1?'s':''}</div>
+      ${itemsHTML}${items.length>8?`<div style="font-size:9px;color:var(--text-dim);padding-top:3px;">+${items.length-8} more…</div>`:''}
+    </div>`;
+  }
+
+  document.getElementById('matrix-grid').innerHTML =
+    quadHTML(quads.actNow,'act-now','Act Now','🔴','High spend · High overrun') +
+    quadHTML(quads.review,'review','Review Spend','🔵','High spend · Low overrun') +
+    quadHTML(quads.watch,'watch','Watch Closely','🟡','Low spend · High overrun') +
+    quadHTML(quads.monitor,'monitor','Monitor','🟢','Low spend · Low overrun');
+}
+
+/* ── TIMELINE ── */
+function renderTimeline(showHlt) {
+  if (showHlt===undefined) showHlt = document.getElementById('show-healthy-chk')?.checked || false;
+  const curMonth = 3; // April = index 3
+  const visible = matters.filter(m => {
+    if (m.level==='critical') return true;
+    if (m.level==='warning') return true;
+    if (m.level==='healthy') return showHlt;
+    return false;
+  });
+  const groups = { critical: visible.filter(m=>m.level==='critical'),
+                   warning:  visible.filter(m=>m.level==='warning'),
+                   healthy:  visible.filter(m=>m.level==='healthy') };
+
+  function rowsHTML(items) {
+    return items.map(m => {
+      const burnPct = Math.min(m.actual/m.budget, 1);
+      const pct = PCT(m.actual, m.budget);
+      const cls = m.level==='critical'?'red':m.level==='warning'?'amber':'green';
+      const barW = Math.min(burnPct*(curMonth/12)*100 + burnPct*20, 95);
+      const nowLeft = (curMonth/12)*100;
+      return `<div class="tl-row">
+        <div class="tl-mname"><span class="mlink" onclick="showScreen('screen2')" style="font-size:10px;color:var(--nav-active);" title="${m.name}">${m.id} ${m.name}</span></div>
+        <div class="tl-track">
+          <div class="tl-now" style="left:${nowLeft}%"></div>
+          <div class="tl-bar ${cls}" style="width:${barW}%">${pct>0?'+'+pct+'%':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let html = '';
+  if (groups.critical.length) html += `<div class="tl-section-lbl red">● Critical Matters (${groups.critical.length})</div>${rowsHTML(groups.critical)}`;
+  if (groups.warning.length)  html += `<div class="tl-section-lbl amber">● Warning Matters (${groups.warning.length})</div>${rowsHTML(groups.warning)}`;
+  if (groups.healthy.length)  html += `<div class="tl-section-lbl" style="color:var(--green)">● Healthy Matters (${groups.healthy.length})</div>${rowsHTML(groups.healthy)}`;
+  document.getElementById('tl-rows').innerHTML = html;
+}
+
+function toggleHealthyTl() {
+  renderTimeline(document.getElementById('show-healthy-chk').checked);
+}
+
+/* ── MAP SEARCH ── */
+let searchTerm = '';
+function filterMapSearch(val) {
+  searchTerm = val.toLowerCase().trim();
+  applyMapFilter();
+}
+
+/* ── INIT ── */
+let s2OriginalContent = '';
+
+window.onload = () => {
+  s2OriginalContent = document.getElementById('s2-dynamic-content').innerHTML;
+  initMap();
+  renderMatrix();
+  updateMatrixBadge();
+  // Hash navigation: e.g. #screen3 jumps directly to that screen
+  const hash = window.location.hash.replace('#','');
+  if (hash && document.getElementById(hash)) showScreen(hash);
+};
+
+/* ── ACTION TRACKING ── */
+let matterResolved = false;
+let clusterResolved = false;
+
+/* ── ACTION STATUS LOOKUP ── */
+const ACTION_STATUS = {
+  'M1042': { key:'live' },   // driven by live checkboxes
+  'M1087': { key:'none',      pill:'⎺ No Action Yet',       cls:'noaction' },
+  'M2034': { key:'escalated', pill:'⬆ Escalated to GC',    cls:'escalated',  bannerCls:'inprogress', icon:'⬆', text:'<strong>Matter #2034 escalated to General Counsel</strong> &nbsp;·&nbsp; <span style="color:var(--blue);">Awaiting GC Decision</span>' },
+  'M2011': { key:'awaiting',  pill:'⏳ Awaiting Response',  cls:'awaiting',   bannerCls:'inprogress', icon:'⏳', text:'<strong>Outside counsel contacted</strong> &nbsp;·&nbsp; Matter #2011 &nbsp;·&nbsp; <span style="color:var(--amber);">Awaiting Response from Baker McKenzie</span>' },
+  'M4044': { key:'resolved',  pill:'✓ Resolved',            cls:'resolved',   bannerCls:'resolved',   icon:'✓', text:'<strong>Matter #4044 marked as Resolved</strong> &nbsp;·&nbsp; <span style="color:var(--green);">All required actions completed</span>' },
+  'M1033': { key:'none',      pill:'⎺ No Action Yet',       cls:'noaction' },
+  'M1055': { key:'none',      pill:'⎺ No Action Yet',       cls:'noaction' },
+  'M2071': { key:'none',      pill:'⎺ No Action Yet',       cls:'noaction' },
+};
+
+function getActionStatus(id) {
+  if (id === 'M1042') {
+    // Return live state
+    if (clusterResolved || matterResolved) return { pill:'✓ Resolved', cls:'resolved' };
+    const cbs = document.querySelectorAll('#screen3 .checklist-item input[type=checkbox], #screen2 .checklist-item input[type=checkbox]');
+    const checked = Array.from(cbs).filter(cb=>cb.checked).length;
+    if (checked > 0) return { pill:'🔄 In Progress', cls:'inprogress' };
+    return { pill:'⎺ No Action Yet', cls:'noaction' };
+  }
+  const s = ACTION_STATUS[id];
+  if (!s) return { pill:'⎺ No Action Yet', cls:'noaction' };
+  return s;
+}
+
+/* ── PER-MATTER SCREEN 2 CONTENT ── */
+const S2_CONTENT = {
+  'M2034': {
+    title: 'AI Risk Briefing — Employment Class Action · Wilson LLP',
+    html: `
+    <div class="bcard burn-section">
+      <div class="bcard-hdr">📊 Budget Burn — Matter #2034 · Employment Class Action</div>
+      <div class="bcard-body">
+        <div class="burn-hdr-row">
+          <span style="font-size:11px;color:var(--text-dim);">Jan → Dec 2026 &nbsp;·&nbsp; <strong style="color:var(--red);">▼ Apr (now)</strong></span>
+          <span style="font-size:12px;font-weight:700;color:var(--red);">$430K spent of $300K budget &nbsp;·&nbsp; +43% overrun &nbsp;·&nbsp; ~12 days remaining</span>
+        </div>
+        <div class="burn-months"><span>Jan</span><span>Feb</span><span>Mar</span><span class="cur">Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span></div>
+        <div class="burn-track">
+          <div class="burn-now" style="left:28%"></div>
+          <div class="burn-bar" style="width:52%;background:var(--red);">+43% over</div>
+        </div>
+        <div class="burn-legend"><span style="color:var(--red);">█ Actual burn (exceeds budget)</span><span style="color:rgba(0,0,0,0.3);">▏ Current date (Apr)</span></div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bcard-hdr">⚡ AI Risk Analysis — Automated by RiskRadar</div>
+      <div class="bcard-body"><div class="ai-text">
+        Matter #2034 — Employment Class Action involving 127 plaintiffs — is tracking $130K over its approved $300K budget. Wilson LLP submitted a billing rate increase of <strong>18% effective Q3 2025</strong> with no corresponding rate card amendment approved in Passport. Accelerated discovery activity and depositions scheduled through Q2 2026 have compounded costs beyond projections.<br/><br/>
+        Given the scale of financial exposure and plaintiff count, this matter has been <strong>escalated to the General Counsel</strong> for strategic review. A GC decision on litigation strategy — continue, settle, or mediate — is expected within 5 business days. Wilson LLP's blended rate remains <strong>23% above peer group average</strong> for Employment matters.
+      </div></div>
+    </div>
+    <div class="two-col">
+      <div class="bcard">
+        <div class="bcard-hdr">Risk Signals — Matter #2034</div>
+        <div class="bcard-body">
+          <div class="sig-row"><div class="sig-lbl">Budget Burn</div><div class="sig-track"><div class="sig-fill red" style="width:91%">Critical</div></div><div class="sig-val red">91 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Litigation Exposure</div><div class="sig-track"><div class="sig-fill red" style="width:85%">Critical</div></div><div class="sig-val red">85 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Vendor Risk</div><div class="sig-track"><div class="sig-fill red" style="width:82%">Critical</div></div><div class="sig-val red">82 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Timeline Risk</div><div class="sig-track"><div class="sig-fill amber" style="width:62%">Watch</div></div><div class="sig-val amber">62 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Settlement Risk</div><div class="sig-track"><div class="sig-fill amber" style="width:57%">Watch</div></div><div class="sig-val amber">57 / 100</div></div>
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid #edf2f7;font-size:11px;color:var(--text-dim);">Employment Class Action · 127 plaintiffs · Wilson LLP</div>
+        </div>
+      </div>
+      <div class="bcard">
+        <div class="bcard-hdr">🧾 Invoice Overview — Matter #2034</div>
+        <div class="bcard-body" style="padding:12px 14px;">
+          <div style="display:flex;gap:0;margin-bottom:14px;">
+            <div style="flex:1;padding-right:16px;border-right:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Pending Approval</div><div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">3 invoices</div><div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Submitted · last 30 days</div></div>
+            <div style="flex:1;padding-left:16px;"><div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Highest Single Invoice</div><div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">$31K</div><div style="font-size:10px;color:var(--text-dim);margin-top:4px;">in last 30 days</div></div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+            <thead><tr style="background:var(--card-hdr);"><th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;border:1px solid var(--border);">Date</th><th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;border:1px solid var(--border);">Invoice</th><th style="padding:5px 8px;text-align:right;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;border:1px solid var(--border);">Amount</th></tr></thead>
+            <tbody style="font-size:11px;">
+              <tr><td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 22</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-3041 · <span style="color:var(--amber);font-weight:700;">Pending</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$31,200</td></tr>
+              <tr style="background:var(--row-alt);"><td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 8</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2990 · <span style="color:var(--amber);font-weight:700;">Pending</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$28,700</td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid #edf2f7;">Mar 20</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2850 · <span style="color:var(--green);font-weight:700;">Approved</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$24,500</td></tr>
+            </tbody>
+          </table>
+          <div style="padding:7px 10px;background:var(--red-bg);border:1px solid #f0c4c2;border-radius:2px;font-size:11px;">⚠ Invoice approvals on hold — <strong style="color:var(--red);">pending GC strategic direction</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bcard-hdr">Actions Taken</div>
+      <div class="bcard-body">
+        <div class="checklist-item actioned"><input type="checkbox" checked disabled/> <span class="ci-text">Reviewed Wilson LLP rate card — 18% rate increase identified, not yet approved in Passport</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item actioned"><input type="checkbox" checked disabled/> <span class="ci-text">Matter #2034 formally escalated to General Counsel — strategic direction requested</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div style="padding:8px 10px;background:#eef4fb;border:1px solid #c5d8ea;border-radius:2px;font-size:11px;color:var(--blue);margin-top:8px;">⬆ Awaiting GC decision — expected within 5 business days</div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bcard-hdr">Matter Overview — #2034 · Employment Class Action</div>
+      <div class="bcard-body" style="padding:0;">
+        <table class="pp-tbl"><thead><tr><th>Matter ID</th><th>Matter Name</th><th>Organization</th><th>Type</th><th>Budget</th><th>Actual Spend</th><th>Overrun</th><th>Action Status</th></tr></thead>
+        <tbody><tr><td style="font-weight:700;color:var(--nav-active);">#2034</td><td>Employment Class Action</td><td>Wilson LLP</td><td>Employment</td><td>$300,000</td><td style="color:var(--red);font-weight:700;">$430,000</td><td><span class="risk-pill red">🔴 +43%</span></td><td><span class="action-pill escalated" style="font-size:11px;padding:3px 8px;">⬆ Escalated to GC</span></td></tr></tbody>
+        </table>
+      </div>
+    </div>`
+  },
+  'M2011': {
+    title: 'AI Risk Briefing — Securities Litigation · Baker McKenzie',
+    html: `
+    <div class="bcard burn-section">
+      <div class="bcard-hdr">📊 Budget Burn — Matter #2011 · Securities Litigation</div>
+      <div class="bcard-body">
+        <div class="burn-hdr-row">
+          <span style="font-size:11px;color:var(--text-dim);">Jan → Dec 2026 &nbsp;·&nbsp; <strong style="color:var(--red);">▼ Apr (now)</strong></span>
+          <span style="font-size:12px;font-weight:700;color:var(--red);">$730K spent of $500K budget &nbsp;·&nbsp; +46% overrun &nbsp;·&nbsp; ~8 days remaining</span>
+        </div>
+        <div class="burn-months"><span>Jan</span><span>Feb</span><span>Mar</span><span class="cur">Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span></div>
+        <div class="burn-track">
+          <div class="burn-now" style="left:28%"></div>
+          <div class="burn-bar" style="width:54%;background:var(--red);">+46% over</div>
+        </div>
+        <div class="burn-legend"><span style="color:var(--red);">█ Actual burn (exceeds budget)</span><span style="color:rgba(0,0,0,0.3);">▏ Current date (Apr)</span></div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bcard-hdr">⚡ AI Risk Analysis — Automated by RiskRadar</div>
+      <div class="bcard-body"><div class="ai-text">
+        Matter #2011 — Securities Litigation in the Southern District of New York — is tracking $230K over its $500K approved budget, the highest absolute overrun in the portfolio. Baker McKenzie's hourly rates for securities work have increased <strong>21% since the matter was opened</strong>, with no rate card amendment reflected in Passport. Expert witness fees and deposition costs are driving additional unforecasted spend.<br/><br/>
+        RiskRadar has flagged an anomalous invoice pattern: <strong>5 invoices exceeding $40K each</strong> submitted in the last 45 days against a portfolio average of 1.2 per matter. Outside counsel has been formally contacted requesting a revised budget estimate and itemized cost breakdown. Response is pending. Baker McKenzie's blended rate is <strong>19% above peer group average</strong> for Litigation matters in the Northeast region.
+      </div></div>
+    </div>
+    <div class="two-col">
+      <div class="bcard">
+        <div class="bcard-hdr">Risk Signals — Matter #2011</div>
+        <div class="bcard-body">
+          <div class="sig-row"><div class="sig-lbl">Budget Burn</div><div class="sig-track"><div class="sig-fill red" style="width:94%">Critical</div></div><div class="sig-val red">94 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Invoice Velocity</div><div class="sig-track"><div class="sig-fill red" style="width:88%">Critical</div></div><div class="sig-val red">88 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Vendor Risk</div><div class="sig-track"><div class="sig-fill red" style="width:79%">Critical</div></div><div class="sig-val red">79 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Timeline Risk</div><div class="sig-track"><div class="sig-fill amber" style="width:66%">Watch</div></div><div class="sig-val amber">66 / 100</div></div>
+          <div class="sig-row"><div class="sig-lbl">Regulatory Exposure</div><div class="sig-track"><div class="sig-fill amber" style="width:71%">Watch</div></div><div class="sig-val amber">71 / 100</div></div>
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid #edf2f7;font-size:11px;color:var(--text-dim);">Securities Litigation · SDNY · Baker McKenzie</div>
+        </div>
+      </div>
+      <div class="bcard">
+        <div class="bcard-hdr">🧾 Invoice Overview — Matter #2011</div>
+        <div class="bcard-body" style="padding:12px 14px;">
+          <div style="display:flex;gap:0;margin-bottom:14px;">
+            <div style="flex:1;padding-right:16px;border-right:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Pending Approval</div><div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">5 invoices</div><div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Submitted · last 45 days</div></div>
+            <div style="flex:1;padding-left:16px;"><div style="font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Highest Single Invoice</div><div style="font-size:30px;font-weight:800;color:var(--hdr);line-height:1;">$47K</div><div style="font-size:10px;color:var(--text-dim);margin-top:4px;">in last 45 days</div></div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+            <thead><tr style="background:var(--card-hdr);"><th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;border:1px solid var(--border);">Date</th><th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;border:1px solid var(--border);">Invoice</th><th style="padding:5px 8px;text-align:right;font-size:10px;font-weight:700;color:var(--card-hdr-t);text-transform:uppercase;border:1px solid var(--border);">Amount</th></tr></thead>
+            <tbody style="font-size:11px;">
+              <tr><td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 25</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-3102 · <span style="color:var(--amber);font-weight:700;">Pending</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$47,300</td></tr>
+              <tr style="background:var(--row-alt);"><td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 18</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-3077 · <span style="color:var(--amber);font-weight:700;">Pending</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$43,800</td></tr>
+              <tr><td style="padding:5px 8px;border:1px solid #edf2f7;">Apr 3</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-3011 · <span style="color:var(--amber);font-weight:700;">Pending</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$41,200</td></tr>
+              <tr style="background:var(--row-alt);"><td style="padding:5px 8px;border:1px solid #edf2f7;">Mar 14</td><td style="padding:5px 8px;border:1px solid #edf2f7;">INV-2911 · <span style="color:var(--green);font-weight:700;">Approved</span></td><td style="padding:5px 8px;border:1px solid #edf2f7;text-align:right;">$38,500</td></tr>
+            </tbody>
+          </table>
+          <div style="padding:7px 10px;background:var(--amber-bg);border:1px solid #eed8a0;border-radius:2px;font-size:11px;">⏳ Baker McKenzie contacted — <strong style="color:var(--amber);">awaiting revised budget estimate and cost breakdown</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bcard-hdr">Actions Taken</div>
+      <div class="bcard-body">
+        <div class="checklist-item actioned"><input type="checkbox" checked disabled/> <span class="ci-text">Identified Baker McKenzie rate increase (21%) — not reflected in Passport rate card</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div class="checklist-item actioned"><input type="checkbox" checked disabled/> <span class="ci-text">Formally contacted Baker McKenzie — requested revised budget estimate and itemized invoice breakdown</span><span class="ci-done-tag">✓ Actioned</span></div>
+        <div style="padding:8px 10px;background:#f5f0ff;border:1px solid #d4b8f0;border-radius:2px;font-size:11px;color:#6b3fa0;margin-top:8px;">⏳ Awaiting response from Baker McKenzie — follow-up scheduled May 8, 2026</div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bcard-hdr">Matter Overview — #2011 · Securities Litigation</div>
+      <div class="bcard-body" style="padding:0;">
+        <table class="pp-tbl"><thead><tr><th>Matter ID</th><th>Matter Name</th><th>Organization</th><th>Type</th><th>Budget</th><th>Actual Spend</th><th>Overrun</th><th>Action Status</th></tr></thead>
+        <tbody><tr><td style="font-weight:700;color:var(--nav-active);">#2011</td><td>Securities Litigation</td><td>Baker McKenzie</td><td>Litigation</td><td>$500,000</td><td style="color:var(--red);font-weight:700;">$730,000</td><td><span class="risk-pill red">🔴 +46%</span></td><td><span class="action-pill awaiting" style="font-size:11px;padding:3px 8px;">⏳ Awaiting Response</span></td></tr></tbody>
+        </table>
+      </div>
+    </div>`
+  }
+};
+
+function openBriefing(matterId) {
+  showScreen('screen2');
+  const s = ACTION_STATUS[matterId];
+  const banner = document.getElementById('s2-banner');
+  const bannerIcon = document.getElementById('s2-banner-icon');
+  const bannerText = document.getElementById('s2-banner-text');
+  const resolveBtn = document.getElementById('s2-resolve-btn');
+  const unresolveBtn = document.getElementById('s2-unresolve-btn');
+  const dynContent = document.getElementById('s2-dynamic-content');
+  const titleEl = document.getElementById('s2-title');
+
+  // M1042 has its own full Matter Detail screen — go directly there
+  if (matterId === 'M1042') {
+    showScreen('screen3');
+    return;
+  }
+
+  // Inject per-matter content for M2034 / M2011
+  if (matterId === 'M2034' || matterId === 'M2011') {
+    const cfg = S2_CONTENT[matterId];
+    titleEl.textContent = cfg.title;
+    dynContent.innerHTML = cfg.html;
+  } else {
+    // Restore default for any other matter
+    titleEl.textContent = 'AI Risk Briefing — California Employment Cluster · Wilson LLP';
+    dynContent.innerHTML = s2OriginalContent;
+  }
+
+  // Banner
+  const statusPill = document.getElementById('s2-status-pill');
+  if (!s || s.key === 'none') {
+    banner.className = 'action-banner'; banner.style.display = 'none';
+    if (statusPill) statusPill.style.display = 'none';
+    return;
+  }
+  banner.style.display = '';
+  banner.className = `action-banner ${s.bannerCls} visible`;
+  bannerIcon.textContent = s.icon;
+  bannerText.innerHTML = s.text + `<span class="action-banner-time"> · ${getTodayStr()}</span>`;
+  if (resolveBtn) resolveBtn.style.display = 'none';
+  if (unresolveBtn) unresolveBtn.style.display = 'none';
+
+  // Header status pill
+  if (statusPill) {
+    const pillStyles = {
+      escalated:  { bg:'#2980b9', color:'#fff', border:'#2980b9' },
+      awaiting:   { bg:'#7b3fa0', color:'#fff', border:'#7b3fa0' },
+      inprogress: { bg:'#2980b9', color:'#fff', border:'#2980b9' },
+      resolved:   { bg:'#1a7a3c', color:'#fff', border:'#1a7a3c' },
+    };
+    const ps = pillStyles[s.bannerCls] || { bg:'#555', color:'#fff', border:'#555' };
+    statusPill.style.display = 'inline-block';
+    statusPill.style.background = ps.bg;
+    statusPill.style.color = ps.color;
+    statusPill.style.borderColor = ps.border;
+    statusPill.textContent = s.pill;
+  }
+}
+
+/* Screen 2 — Cluster level */
+function onClusterActionCheck() {
+  if (clusterResolved) return;
+  const items = document.querySelectorAll('#screen2 .checklist-item input[type=checkbox]');
+  const total = items.length;
+  const checked = Array.from(items).filter(cb => cb.checked).length;
+  items.forEach(cb => cb.closest('.checklist-item').classList.toggle('actioned', cb.checked));
+  const banner = document.getElementById('s2-banner');
+  const bannerText = document.getElementById('s2-banner-text');
+  const bannerIcon = document.getElementById('s2-banner-icon');
+  if (checked === 0) {
+    banner.className = 'action-banner';
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = '';
+  banner.className = 'action-banner inprogress visible';
+  bannerIcon.textContent = '⚠';
+  bannerText.innerHTML = `<strong>${checked} of ${total} actions taken</strong> &nbsp;·&nbsp; CA Employment Cluster &nbsp;·&nbsp; <span style="color:var(--amber);">In Progress</span><span class="action-banner-time"> · Updated ${getTodayStr()}</span>`;
+  document.getElementById('s2-resolve-btn').style.display = '';
+  updateS2Pill('inprogress', '🔄 In Progress');
+}
+
+function markClusterResolved() {
+  clusterResolved = true;
+  const items = document.querySelectorAll('#screen2 .checklist-item input[type=checkbox]');
+  items.forEach(cb => { cb.disabled = true; cb.closest('.checklist-item').classList.add('actioned'); });
+  const banner = document.getElementById('s2-banner');
+  banner.style.display = '';
+  banner.className = 'action-banner resolved visible';
+  document.getElementById('s2-banner-icon').textContent = '✓';
+  document.getElementById('s2-banner-text').innerHTML = `<strong>CA Employment Cluster marked as Resolved</strong> &nbsp;·&nbsp; <span style="color:var(--green);">All required actions completed</span><span class="action-banner-time"> · ${getTodayStr()}</span>`;
+  document.getElementById('s2-resolve-btn').style.display = 'none';
+  document.getElementById('s2-unresolve-btn').style.display = '';
+  updateS2Pill('resolved', '✓ Resolved');
+}
+
+function markClusterUnresolved() {
+  clusterResolved = false;
+  const items = document.querySelectorAll('#screen2 .checklist-item input[type=checkbox]');
+  items.forEach(cb => { cb.disabled = false; });
+  document.getElementById('s2-unresolve-btn').style.display = 'none';
+  onClusterActionCheck();
+}
+
+/* Screen 3 — Matter level */
+function onActionCheck() {
+  if (matterResolved) return;
+  const items = document.querySelectorAll('#screen3 .checklist-item input[type=checkbox]');
+  const total = items.length;
+  const checked = Array.from(items).filter(cb => cb.checked).length;
+  items.forEach(cb => cb.closest('.checklist-item').classList.toggle('actioned', cb.checked));
+  const banner = document.getElementById('s3-banner');
+  const bannerText = document.getElementById('s3-banner-text');
+  const bannerIcon = document.getElementById('s3-banner-icon');
+  if (checked === 0) {
+    banner.className = 'action-banner';
+    updateS2Pill('none', '');
+    return;
+  }
+  banner.className = 'action-banner inprogress visible';
+  bannerIcon.textContent = '⚠';
+  bannerText.innerHTML = `<strong>${checked} of ${total} actions taken</strong> &nbsp;·&nbsp; Matter #1042 &nbsp;·&nbsp; <span style="color:var(--amber);">In Progress</span><span class="action-banner-time"> · Updated ${getTodayStr()}</span>`;
+  document.getElementById('s3-resolve-btn').style.display = '';
+  updateS2Pill('inprogress', '🔄 In Progress');
+}
+
+function markResolved() {
+  matterResolved = true;
+  const items = document.querySelectorAll('#screen3 .checklist-item input[type=checkbox]');
+  items.forEach(cb => { cb.disabled = true; cb.closest('.checklist-item').classList.add('actioned'); });
+  const banner = document.getElementById('s3-banner');
+  banner.className = 'action-banner resolved visible';
+  document.getElementById('s3-banner-icon').textContent = '✓';
+  document.getElementById('s3-banner-text').innerHTML = `<strong>Matter #1042 marked as Resolved</strong> &nbsp;·&nbsp; <span style="color:var(--green);">All required actions completed</span><span class="action-banner-time"> · ${getTodayStr()}</span>`;
+  document.getElementById('s3-resolve-btn').style.display = 'none';
+  document.getElementById('s3-unresolve-btn').style.display = '';
+  updateS2Pill('resolved', '✓ Resolved');
+}
+
+function markUnresolved() {
+  matterResolved = false;
+  const items = document.querySelectorAll('#screen3 .checklist-item input[type=checkbox]');
+  items.forEach(cb => { cb.disabled = false; });
+  document.getElementById('s3-unresolve-btn').style.display = 'none';
+  onActionCheck();
+}
+
+function updateS2Pill(state, label) {
+  const pill = document.getElementById('s2-pill-1042');
+  const nopill = document.getElementById('s2-nopill-1042');
+  if (!pill) return;
+  if (state === 'none') {
+    pill.className = 'action-pill none';
+    pill.textContent = '';
+    if (nopill) nopill.style.display = '';
+  } else {
+    pill.className = 'action-pill ' + state;
+    pill.textContent = label;
+    if (nopill) nopill.style.display = 'none';
+  }
+}
+
+function getTodayStr() {
+  return new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+</script>
+</body>
+</html>

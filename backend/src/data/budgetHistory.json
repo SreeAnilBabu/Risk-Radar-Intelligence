@@ -1,0 +1,120 @@
+[
+  {
+    "matterId": "matter-001",
+    "matterNumber": "M1042",
+    "matterTitle": "Smith v. Acme Corp",
+    "originalBudget": 200000,
+    "currentApprovedTotal": 320000,
+    "currentBurn": 286000,
+    "remainingAtCurrentBurn": 34000,
+    "projectedNextRevisionAt": "2026-05-25T00:00:00.000Z",
+    "monthlyBurnRate": 22000,
+    "reallocationRiskLevel": "high",
+    "reallocationRiskNote": "At current burn rate, a 3rd budget revision is projected by ~May 25. Without rate-card correction, each additional month adds ~$22K in unplanned spend.",
+    "advisoryNote": "Resolve the Wilson LLP rate card violation before approving further reallocation. Correcting the 18% overcharge could reduce future invoices by approximately ~$12K/month.",
+    "revisions": [
+      {
+        "id": "rev-1042-0",
+        "label": "ORIGINAL",
+        "date": "2026-01-14T00:00:00.000Z",
+        "amount": 200000,
+        "delta": 0,
+        "reason": "Initial approved budget",
+        "approvedBy": "M. Chen",
+        "status": "original"
+      },
+      {
+        "id": "rev-1042-1",
+        "label": "REV 1",
+        "date": "2026-02-28T00:00:00.000Z",
+        "amount": 280000,
+        "delta": 80000,
+        "reason": "Scope expansion — additional depositions required",
+        "approvedBy": "M. Chen",
+        "status": "approved"
+      },
+      {
+        "id": "rev-1042-2",
+        "label": "REV 2",
+        "date": "2026-04-01T00:00:00.000Z",
+        "amount": 320000,
+        "delta": 40000,
+        "reason": "Expert witness costs — two additional experts engaged",
+        "approvedBy": "M. Chen",
+        "status": "approved"
+      }
+    ]
+  },
+  {
+    "matterId": "matter-002",
+    "matterNumber": "M1058",
+    "matterTitle": "PAGA arbitration challenge",
+    "originalBudget": 150000,
+    "currentApprovedTotal": 195000,
+    "currentBurn": 142000,
+    "remainingAtCurrentBurn": 53000,
+    "projectedNextRevisionAt": "2026-06-12T00:00:00.000Z",
+    "monthlyBurnRate": 18000,
+    "reallocationRiskLevel": "medium",
+    "reallocationRiskNote": "Burn pace is sustainable but the next regulatory hearing in late June may trigger another scope review.",
+    "advisoryNote": null,
+    "revisions": [
+      {
+        "id": "rev-1058-0",
+        "label": "ORIGINAL",
+        "date": "2026-01-22T00:00:00.000Z",
+        "amount": 150000,
+        "delta": 0,
+        "reason": "Initial approved budget",
+        "approvedBy": "M. Chen",
+        "status": "original"
+      },
+      {
+        "id": "rev-1058-1",
+        "label": "REV 1",
+        "date": "2026-03-18T00:00:00.000Z",
+        "amount": 195000,
+        "delta": 45000,
+        "reason": "Arbitrator selection and panel discovery costs",
+        "approvedBy": "M. Chen",
+        "status": "approved"
+      }
+    ]
+  },
+  {
+    "matterId": "matter-003",
+    "matterNumber": "M1071",
+    "matterTitle": "Overtime misclassification audit response",
+    "originalBudget": 180000,
+    "currentApprovedTotal": 245000,
+    "currentBurn": 176000,
+    "remainingAtCurrentBurn": 69000,
+    "projectedNextRevisionAt": null,
+    "monthlyBurnRate": 16500,
+    "reallocationRiskLevel": "low",
+    "reallocationRiskNote": "On track. No reallocation expected before the May 25 production deadline.",
+    "advisoryNote": null,
+    "revisions": [
+      {
+        "id": "rev-1071-0",
+        "label": "ORIGINAL",
+        "date": "2026-02-04T00:00:00.000Z",
+        "amount": 180000,
+        "delta": 0,
+        "reason": "Initial approved budget",
+        "approvedBy": "M. Chen",
+        "status": "original"
+      },
+      {
+        "id": "rev-1071-1",
+        "label": "REV 1",
+        "date": "2026-03-30T00:00:00.000Z",
+        "amount": 245000,
+        "delta": 65000,
+        "reason": "Document production scope expansion (3-year lookback)",
+        "approvedBy": "M. Chen",
+        "status": "approved"
+      }
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "vendor-arc",
+    "name": "Arc Litigation Partners",
+    "activeMatterCount": 4,
+    "totalSpend": 493000,
+    "performanceRiskScore": 71,
+    "billingAnomalyCount": 2,
+    "jurisdictionIds": ["US-CA", "US-NY", "US-NJ"]
+  },
+  {
+    "id": "vendor-summit",
+    "name": "Summit Counsel Group",
+    "activeMatterCount": 3,
+    "totalSpend": 350000,
+    "performanceRiskScore": 64,
+    "billingAnomalyCount": 1,
+    "jurisdictionIds": ["US-CA", "US-TX", "US-WA"]
+  },
+  {
+    "id": "vendor-harbor",
+    "name": "Harbor Legal Advisory",
+    "activeMatterCount": 3,
+    "totalSpend": 302000,
+    "performanceRiskScore": 58,
+    "billingAnomalyCount": 1,
+    "jurisdictionIds": ["US-NY", "US-IL", "US-MA"]
+  },
+  {
+    "id": "vendor-lattice",
+    "name": "Lattice Employment Law",
+    "activeMatterCount": 3,
+    "totalSpend": 281000,
+    "performanceRiskScore": 69,
+    "billingAnomalyCount": 3,
+    "jurisdictionIds": ["US-TX", "US-FL", "US-CA"]
+  }
+]

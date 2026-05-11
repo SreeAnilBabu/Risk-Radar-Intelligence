@@ -119,6 +119,8 @@ A GC can ask conversational risk questions and receive both narrative answers an
 - Two filters conflict and would produce empty result sets.
 - One or more visual encodings are not distinguishable for color-blind users.
 - Risk trend data contains outliers that could distort dashboard interpretation.
+- A matter has no budget revisions yet (Budget History card must show an empty-state instead of an error).
+- The Passport deep-link base URL is not configured (the "Open Matter in Passport" button must degrade gracefully without crashing the app).
 
 ## Requirements *(mandatory)*
 
@@ -141,7 +143,7 @@ A GC can ask conversational risk questions and receive both narrative answers an
 - **FR-015**: The system MUST provide a global natural-language query entry point for cross-cutting risk questions.
 - **FR-016**: Query responses MUST include both textual interpretation and corresponding visual emphasis in relevant views.
 - **FR-017**: All core user journeys MUST be visually demonstrable within a 7-minute narrated demo sequence.
-- **FR-018**: The system MUST use mock data and MUST NOT require live Passport database connectivity.
+- **FR-018**: The system MUST operate exclusively from local JSON seed data; live Passport database connectivity is removed for demo and the data-source toggle MUST default to JSON with no runtime path that calls the database.
 - **FR-019**: The system MUST exclude user authentication, external notification delivery, PDF export, and multi-tenant administration from scope.
 - **FR-020**: The system MUST maintain accessible interaction paths for critical flows, including keyboard navigation and assistive labeling.
 
@@ -164,6 +166,9 @@ A GC can ask conversational risk questions and receive both narrative answers an
 - **Risk Alert**: Represents actionable risk events with type, severity, affected area, timestamp, and lifecycle status.
 - **Risk Time Series Point**: Represents historical snapshots used for trend interpretation and anomaly visibility.
 - **Simulation Scenario Result**: Represents projected risk changes and mitigation guidance for hypothetical events.
+- **Matter Budget Revision**: Represents an originating budget plus subsequent revisions for a matter, including revision date, delta amount, reason, approver, current approved total, remaining balance at current burn, and projected next-revision date.
+- **Matter Activity Event**: Represents a chronological event on a matter, scoped to five types — matter opened, budget revision approved, invoice submitted/approved, rate-card violation detected, and alert raised — with timestamp, severity, and a short narrative.
+- **Recommended Action**: Represents a prioritized, checkbox-style action item for a matter (rule-derived from matter signals, with curated overrides for demo-narrative matters), tracked locally in the browser only.
 
 ## Success Criteria *(mandatory)*
 
@@ -204,3 +209,22 @@ A GC can ask conversational risk questions and receive both narrative answers an
 - **FR-022**: The system MUST refresh demo risk views automatically every 15 seconds.
 - **FR-023**: For unsupported simulation prompts, the system MUST return the nearest preset scenario with a clear approximation disclaimer.
 - **FR-024**: Alert escalation MUST remain in-application only by moving alerts into a prioritized queue with visual prominence and updated counters.
+
+## Clarifications (2026-05-07)
+
+### Session Answers Applied
+
+- **CL-006 Open Matter in Passport Button**: The Matter Detail page MUST render an "Open Matter in Passport — Budget Tab" deep-link button. The link target is built from a frontend environment variable (`VITE_PASSPORT_BASE_URL`) using the pattern `${VITE_PASSPORT_BASE_URL}/matter/{matterId}/budget` and opens in a new browser tab. When the env var is unset, the button MUST fall back to a safe placeholder URL so the app never crashes and the demo flow remains intact.
+- **CL-007 Budget History Data Scope**: Rich, hand-curated budget revision histories are seeded only for the demo-narrative matters (matter #1042 "Smith v. Acme Corp" plus 2–3 supporting matters in the California Employment cluster). All other matters render a "No revisions yet" empty state for the Budget History card.
+- **CL-008 Passport DB Soft Disconnect**: The Passport SQL Server data source MUST be disconnected at runtime. The `RISKRADAR_DATA_SOURCE=passport` code path MUST be removed from API routes so JSON loaders are the only runtime data source. The probe scripts under `backend/scripts/` MUST be removed. The `passportDb.ts` and `passportRepo.ts` files plus the `mssql` dependency MAY remain in the repository as dormant code for a follow-up cleanup, but MUST NOT be reachable from any executing route.
+- **CL-009 Activity Timeline Event Types**: The Activity Timeline on the Matter Detail page MUST surface exactly five event types in reverse-chronological order: matter opened, budget revision approved, invoice submitted/approved, rate-card violation detected, and alert raised. Other event types are out of scope for this iteration.
+- **CL-010 Recommended Actions Generation**: Recommended Actions MUST be produced by a deterministic rules engine that derives a prioritized list from matter signals (rate-card violations, projected budget revision, cluster exposure, pending invoices). Demo-narrative matters MUST receive a curated override list to guarantee the demo script. Checkbox completion state is local to the browser session only and MUST NOT be persisted to any backend.
+
+### Requirement Updates From Clarification
+
+- **FR-025**: The Matter Detail page MUST render a "Open Matter in Passport — Budget Tab" deep-link button that targets `${VITE_PASSPORT_BASE_URL}/matter/{matterId}/budget`, opens in a new tab, and gracefully falls back to a placeholder URL when the env var is unset.
+- **FR-026**: The Matter Detail page MUST render a Budget History card showing original budget, each revision (date, amount delta, reason, approver), current approved total, remaining balance at current burn, projected next-revision date, and a Reallocation Risk advisory when applicable.
+- **FR-027**: For matters without seeded revisions, the Budget History card MUST render an empty state and MUST NOT generate synthetic revisions.
+- **FR-028**: The Matter Detail page MUST render an Activity Timeline that displays the five event types defined in CL-009, in reverse-chronological order, with severity indicators consistent with the rest of the UI.
+- **FR-029**: The Matter Detail page MUST render a Recommended Actions card containing a prioritized, numbered, checkbox-style list of actions derived by a deterministic rules engine, overridable by curated lists for demo-narrative matters, with checkbox state held only in the browser session.
+- **FR-030**: The backend MUST NOT execute any Passport SQL Server query at runtime; the only data source for API responses MUST be local JSON seed files. Probe scripts under `backend/scripts/` MUST be removed.

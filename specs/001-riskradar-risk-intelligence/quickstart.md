@@ -31,6 +31,16 @@ cd frontend
 npm install
 ```
 
+Optional validation after install:
+
+```bash
+cd backend
+npm run build
+
+cd ../frontend
+npm run build
+```
+
 ## 2. Start Services
 
 Backend (default http://localhost:4000):
@@ -137,6 +147,10 @@ Suggested minimum suites:
 - Alert status transition tests
 - API contract tests for required endpoints
 
+Implementation coverage delivered in this repo:
+- Backend unit tests for FR-021 risk scoring, AI briefing narrative, alert counters, and simulation matching
+- Frontend unit/component tests for dashboard selectors, map drill-in, briefing follow-up, alerts queue, simulator disclaimer, drill-down sorting, and global query behavior
+
 ## 7. Performance and UX Budget Checks
 
 - Initial map load: <2s to usable view.
@@ -164,3 +178,9 @@ Manual profiling checklist:
 4. Open /alerts: escalate one critical alert into priority queue.
 5. Open /simulator: run supported scenario, then unsupported prompt fallback.
 6. Trigger AI briefing and ask follow-up query for executive narrative close.
+
+## 10. Delivery Notes
+
+- Backend workspace lives in `backend/` and serves mock JSON APIs on port 4000.
+- Frontend workspace lives in `frontend/` and serves the React app on port 5173.
+- The repository includes a local `.npmrc`; if package installation is blocked by your environment, align npm registry access with your organization policy before running install/build/test commands.

@@ -1,0 +1,138 @@
+[
+  {
+    "id": "US-CA",
+    "name": "California",
+    "code": "CA",
+    "trendDirection": "rising",
+    "riskFactors": {
+      "financialExposure": 92,
+      "matterComplexity": 88,
+      "deadlinePressure": 82,
+      "regulatoryVolatility": 96,
+      "vendorPerformanceRisk": 78
+    },
+    "matterCount": 24,
+    "totalSpend": 1280000,
+    "openAlerts": 4,
+    "geometryRef": "west-ca"
+  },
+  {
+    "id": "US-NY",
+    "name": "New York",
+    "code": "NY",
+    "trendDirection": "rising",
+    "riskFactors": {
+      "financialExposure": 89,
+      "matterComplexity": 90,
+      "deadlinePressure": 85,
+      "regulatoryVolatility": 91,
+      "vendorPerformanceRisk": 76
+    },
+    "matterCount": 19,
+    "totalSpend": 1145000,
+    "openAlerts": 3,
+    "geometryRef": "east-ny"
+  },
+  {
+    "id": "US-TX",
+    "name": "Texas",
+    "code": "TX",
+    "trendDirection": "rising",
+    "riskFactors": {
+      "financialExposure": 74,
+      "matterComplexity": 72,
+      "deadlinePressure": 69,
+      "regulatoryVolatility": 68,
+      "vendorPerformanceRisk": 63
+    },
+    "matterCount": 16,
+    "totalSpend": 856000,
+    "openAlerts": 2,
+    "geometryRef": "south-tx"
+  },
+  {
+    "id": "US-FL",
+    "name": "Florida",
+    "code": "FL",
+    "trendDirection": "stable",
+    "riskFactors": {
+      "financialExposure": 61,
+      "matterComplexity": 58,
+      "deadlinePressure": 57,
+      "regulatoryVolatility": 52,
+      "vendorPerformanceRisk": 48
+    },
+    "matterCount": 11,
+    "totalSpend": 502000,
+    "openAlerts": 1,
+    "geometryRef": "south-fl"
+  },
+  {
+    "id": "US-IL",
+    "name": "Illinois",
+    "code": "IL",
+    "trendDirection": "stable",
+    "riskFactors": {
+      "financialExposure": 70,
+      "matterComplexity": 67,
+      "deadlinePressure": 61,
+      "regulatoryVolatility": 66,
+      "vendorPerformanceRisk": 54
+    },
+    "matterCount": 13,
+    "totalSpend": 610000,
+    "openAlerts": 2,
+    "geometryRef": "midwest-il"
+  },
+  {
+    "id": "US-WA",
+    "name": "Washington",
+    "code": "WA",
+    "trendDirection": "stable",
+    "riskFactors": {
+      "financialExposure": 57,
+      "matterComplexity": 54,
+      "deadlinePressure": 51,
+      "regulatoryVolatility": 59,
+      "vendorPerformanceRisk": 46
+    },
+    "matterCount": 9,
+    "totalSpend": 358000,
+    "openAlerts": 1,
+    "geometryRef": "west-wa"
+  },
+  {
+    "id": "US-MA",
+    "name": "Massachusetts",
+    "code": "MA",
+    "trendDirection": "falling",
+    "riskFactors": {
+      "financialExposure": 49,
+      "matterComplexity": 45,
+      "deadlinePressure": 44,
+      "regulatoryVolatility": 47,
+      "vendorPerformanceRisk": 39
+    },
+    "matterCount": 7,
+    "totalSpend": 284000,
+    "openAlerts": 0,
+    "geometryRef": "east-ma"
+  },
+  {
+    "id": "US-NJ",
+    "name": "New Jersey",
+    "code": "NJ",
+    "trendDirection": "rising",
+    "riskFactors": {
+      "financialExposure": 66,
+      "matterComplexity": 63,
+      "deadlinePressure": 58,
+      "regulatoryVolatility": 71,
+      "vendorPerformanceRisk": 52
+    },
+    "matterCount": 10,
+    "totalSpend": 442000,
+    "openAlerts": 2,
+    "geometryRef": "east-nj"
+  }
+]

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "alert-001",
+    "jurisdictionId": "US-CA",
+    "matterId": "matter-001",
+    "type": "threshold_breach",
+    "severity": "critical",
+    "status": "unread",
+    "message": "California employment risk breached the critical threshold after two new filings.",
+    "recommendedAction": "Escalate to the employment response squad and confirm settlement reserve assumptions.",
+    "createdAt": "2026-04-21T08:50:00.000Z",
+    "updatedAt": "2026-04-21T08:50:00.000Z"
+  },
+  {
+    "id": "alert-002",
+    "jurisdictionId": "US-NY",
+    "matterId": "matter-003",
+    "type": "regulatory_change",
+    "severity": "critical",
+    "status": "escalated",
+    "message": "New York labor guidance expanded disclosure obligations for current wage disputes.",
+    "recommendedAction": "Hold a same-day counsel review and reprioritize response deadlines.",
+    "createdAt": "2026-04-21T08:15:00.000Z",
+    "updatedAt": "2026-04-21T08:40:00.000Z",
+    "escalatedAt": "2026-04-21T08:40:00.000Z"
+  },
+  {
+    "id": "alert-003",
+    "jurisdictionId": "US-TX",
+    "matterId": "matter-005",
+    "type": "deadline_risk",
+    "severity": "high",
+    "status": "unread",
+    "message": "Texas whistleblower review has a cluster of witness interviews due within five business days.",
+    "recommendedAction": "Rebalance outside counsel staffing before the deadline stack intensifies.",
+    "createdAt": "2026-04-21T07:55:00.000Z",
+    "updatedAt": "2026-04-21T07:55:00.000Z"
+  },
+  {
+    "id": "alert-004",
+    "jurisdictionId": "US-IL",
+    "matterId": "matter-007",
+    "type": "regulatory_change",
+    "severity": "high",
+    "status": "read",
+    "message": "Illinois labeling enforcement timeline tightened for active matters.",
+    "recommendedAction": "Confirm discovery plan and update operational owners on revised dates.",
+    "createdAt": "2026-04-21T06:20:00.000Z",
+    "updatedAt": "2026-04-21T07:10:00.000Z"
+  },
+  {
+    "id": "alert-005",
+    "jurisdictionId": "US-CA",
+    "matterId": "matter-012",
+    "type": "deadline_risk",
+    "severity": "high",
+    "status": "snoozed",
+    "message": "California WARN review remains exposed to a narrow notice window.",
+    "recommendedAction": "Resume review tomorrow morning after HR submits updated employee counts.",
+    "createdAt": "2026-04-20T23:50:00.000Z",
+    "updatedAt": "2026-04-21T06:00:00.000Z"
+  },
+  {
+    "id": "alert-006",
+    "jurisdictionId": "US-NJ",
+    "matterId": "matter-010",
+    "type": "threshold_breach",
+    "severity": "medium",
+    "status": "unread",
+    "message": "New Jersey benefits exposure entered the rising-risk band.",
+    "recommendedAction": "Review whether vendor staffing is aligned with the audit calendar.",
+    "createdAt": "2026-04-21T05:50:00.000Z",
+    "updatedAt": "2026-04-21T05:50:00.000Z"
+  }
+]
